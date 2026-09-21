@@ -1,0 +1,143 @@
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+
+@source '../views';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+    --font-sans:
+        'Outfit', ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'Noto Color Emoji';
+
+    --radius-lg: var(--radius);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-sm: calc(var(--radius) - 4px);
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+    --background: #F9F6EE;
+    --foreground: #3E362E;
+    --card: #FFFFFF;
+    --card-foreground: #3E362E;
+    --popover: #FFFFFF;
+    --popover-foreground: #3E362E;
+    --primary: #D4AF37;
+    --primary-foreground: #FFFFFF;
+    --secondary: #EFEBE0;
+    --secondary-foreground: #3E362E;
+    --muted: #EFEBE0;
+    --muted-foreground: #8B857A;
+    --accent: #D4AF37;
+    --accent-foreground: #FFFFFF;
+    --destructive: #EF4444;
+    --destructive-foreground: #FFFFFF;
+    --border: #E5E0D5;
+    --input: #E5E0D5;
+    --ring: #D4AF37;
+    --chart-1: #D4AF37;
+    --chart-2: #8B857A;
+    --chart-3: #3E362E;
+    --chart-4: #EFEBE0;
+    --chart-5: #F9F6EE;
+    --radius: 0.5rem;
+    --sidebar: #F9F6EE;
+    --sidebar-foreground: #3E362E;
+    --sidebar-primary: #D4AF37;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #EFEBE0;
+    --sidebar-accent-foreground: #3E362E;
+    --sidebar-border: #E5E0D5;
+    --sidebar-ring: #D4AF37;
+}
+
+.dark {
+    --background: #1C1917;
+    --foreground: #F9F6EE;
+    --card: #292524;
+    --card-foreground: #F9F6EE;
+    --popover: #292524;
+    --popover-foreground: #F9F6EE;
+    --primary: #D4AF37;
+    --primary-foreground: #1C1917;
+    --secondary: #44403C;
+    --secondary-foreground: #F9F6EE;
+    --muted: #44403C;
+    --muted-foreground: #A8A29E;
+    --accent: #D4AF37;
+    --accent-foreground: #1C1917;
+    --destructive: #7F1D1D;
+    --destructive-foreground: #F9F6EE;
+    --border: #44403C;
+    --input: #44403C;
+    --ring: #D4AF37;
+    --chart-1: oklch(0.488 0.243 264.376);
+    --chart-2: oklch(0.696 0.17 162.48);
+    --chart-3: oklch(0.769 0.188 70.08);
+    --chart-4: oklch(0.627 0.265 303.9);
+    --chart-5: oklch(0.645 0.246 16.439);
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.985 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(0.269 0 0);
+    --sidebar-ring: oklch(0.439 0 0);
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+    }
+}
