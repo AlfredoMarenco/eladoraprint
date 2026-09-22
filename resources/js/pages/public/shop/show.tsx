@@ -2,6 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { motion } from 'framer-motion';
 import { ShoppingCart, ChevronLeft, Check } from 'lucide-react';
 import { useState } from 'react';
