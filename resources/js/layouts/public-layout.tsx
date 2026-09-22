@@ -1,10 +1,35 @@
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import AppLogoIcon from '@/components/app-logo-icon';
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
+import { ShoppingCart, Trash2, X } from 'lucide-react';
+import { useCartStore } from '@/stores/useCartStore';
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+    SheetFooter,
+} from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
+    const { items, removeItem, updateQuantity, getCartTotal, getCartCount } = useCartStore();
+    const [mounted, setMounted] = useState(false);
+    const [open, setOpen] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const proceedToCheckout = () => {
+        setOpen(false);
+        router.visit('/checkout');
+    };
+
     return (
-        <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/20">
+        <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-[#D4AF37]/20">
             {/* Header / Navbar */}
             <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
                 <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
@@ -14,16 +39,86 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
                         </Link>
                     </div>
                     <nav className="hidden md:flex gap-8 items-center text-sm font-medium">
-                        <Link href="/" className="hover:text-primary transition-colors">Inicio</Link>
-                        <Link href="/portfolio" className="hover:text-primary transition-colors">Portafolio</Link>
-                        <Link href="/blog" className="hover:text-primary transition-colors">Blog</Link>
-                        <Link href="/about" className="hover:text-primary transition-colors">Sobre Mí</Link>
+                        <Link href="/portfolio" className="hover:text-[#D4AF37] transition-colors">Portafolio</Link>
+                        <Link href="/shop" className="hover:text-[#D4AF37] transition-colors">Tienda</Link>
+                        <Link href="/blog" className="hover:text-[#D4AF37] transition-colors">Blog</Link>
+                        <Link href="/about" className="hover:text-[#D4AF37] transition-colors">Sobre Mí</Link>
                     </nav>
                     <div className="flex items-center gap-4">
-                        <Link href="/admin" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                            Ingresar
-                        </Link>
-                        <a href="mailto:contacto@eladoraprint.com" className="hidden md:inline-flex items-center justify-center rounded-full bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+                        <Sheet open={open} onOpenChange={setOpen}>
+                            <SheetTrigger asChild>
+                                <button className="relative p-2 hover:bg-muted rounded-full transition-colors">
+                                    <ShoppingCart className="h-5 w-5 text-[#3E362E]" />
+                                    {mounted && getCartCount() > 0 && (
+                                        <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 rounded-full bg-[#D4AF37] text-white">
+                                            {getCartCount()}
+                                        </Badge>
+                                    )}
+                                </button>
+                            </SheetTrigger>
+                            <SheetContent className="w-full sm:max-w-md bg-[#F9F6EE] flex flex-col h-full">
+                                <SheetHeader>
+                                    <SheetTitle className="text-2xl font-serif text-[#3E362E]">Tu Carrito</SheetTitle>
+                                </SheetHeader>
+                                
+                                <div className="flex-1 overflow-y-auto py-4">
+                                    {mounted && items.length === 0 ? (
+                                        <div className="flex flex-col items-center justify-center h-full text-[#3E362E]/50">
+                                            <ShoppingCart className="h-12 w-12 mb-4 opacity-50" />
+                                            <p>Tu carrito está vacío.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {mounted && items.map((item) => (
+                                                <div key={item.id} className="flex gap-4 bg-white p-3 rounded-lg shadow-sm">
+                                                    <div className="h-20 w-20 bg-muted rounded-md overflow-hidden shrink-0">
+                                                        {item.image_url ? (
+                                                            <img src={item.image_url} alt={item.name} className="h-full w-full object-cover" />
+                                                        ) : (
+                                                            <div className="h-full w-full flex items-center justify-center bg-gray-100 text-xs">Sin img</div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1 flex flex-col">
+                                                        <div className="flex justify-between items-start">
+                                                            <h4 className="font-medium text-[#3E362E] line-clamp-1">{item.name}</h4>
+                                                            <button onClick={() => removeItem(item.id)} className="text-red-500 hover:bg-red-50 p-1 rounded">
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </button>
+                                                        </div>
+                                                        <p className="text-[#D4AF37] font-semibold">${item.price.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
+                                                        
+                                                        <div className="flex items-center gap-3 mt-auto">
+                                                            <div className="flex items-center border rounded-md">
+                                                                <button onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))} className="px-2 py-1 hover:bg-muted">-</button>
+                                                                <span className="px-2 py-1 text-sm">{item.quantity}</span>
+                                                                <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="px-2 py-1 hover:bg-muted">+</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {mounted && items.length > 0 && (
+                                    <div className="border-t pt-4 mt-auto">
+                                        <div className="flex justify-between text-lg font-semibold text-[#3E362E] mb-6">
+                                            <span>Subtotal</span>
+                                            <span>${getCartTotal().toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                                        </div>
+                                        <Button 
+                                            onClick={proceedToCheckout}
+                                            className="w-full bg-[#3E362E] text-white hover:bg-[#2a241f] py-6 text-lg rounded-full"
+                                        >
+                                            Ir al Checkout
+                                        </Button>
+                                    </div>
+                                )}
+                            </SheetContent>
+                        </Sheet>
+
+                        <a href="mailto:contacto@eladoraprint.com" className="hidden md:inline-flex items-center justify-center rounded-full bg-[#3E362E] px-6 py-2.5 text-sm font-medium text-[#F9F6EE] shadow transition-colors hover:bg-[#3E362E]/90 focus-visible:outline-none disabled:opacity-50">
                             Contáctame
                         </a>
                     </div>

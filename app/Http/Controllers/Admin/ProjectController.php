@@ -117,7 +117,14 @@ class ProjectController extends Controller
 
     public function destroy(Project $project)
     {
-        $project->delete();
-        return redirect()->route('admin.projects.index')->with('success', 'Proyecto eliminado.');
+        try {
+            $project->delete();
+            return redirect()->route('admin.projects.index')->with('success', 'Proyecto eliminado.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() === '23000') {
+                return redirect()->route('admin.projects.index')->with('error', 'El proyecto no se puede eliminar porque tiene elementos asociados.');
+            }
+            throw $e;
+        }
     }
 }

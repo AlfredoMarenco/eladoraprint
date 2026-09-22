@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('category_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('category_id')->nullable()->constrained()->restrictOnDelete();
             $table->string('title');
             $table->string('slug')->unique();
             $table->text('description')->nullable();

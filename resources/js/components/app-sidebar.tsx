@@ -1,5 +1,5 @@
-import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, Image, Tags, FileText, MessageSquare, Briefcase, Settings } from 'lucide-react';
+import { router } from '@inertiajs/react';
+import { BookOpen, FolderGit2, LayoutGrid, Image, Tags, FileText, MessageSquare, Briefcase, Settings, ShoppingCart, Package } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -31,38 +31,54 @@ import {
 import { 
     index as adminSettingsIndex,
 } from '@/routes/admin/settings';
+import { 
+    index as adminProductsIndex,
+} from '@/routes/admin/products';
+import { 
+    index as adminOrdersIndex,
+} from '@/routes/admin/orders';
 import { dashboard as adminDashboard } from '@/routes/admin/index';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: adminDashboard(),
+        href: adminDashboard.url(),
         icon: LayoutGrid,
     },
     {
+        title: 'Órdenes',
+        href: adminOrdersIndex.url(),
+        icon: ShoppingCart,
+    },
+    {
+        title: 'Productos',
+        href: adminProductsIndex.url(),
+        icon: Package,
+    },
+    {
         title: 'Proyectos',
-        href: adminProjectsIndex(),
+        href: adminProjectsIndex.url(),
         icon: Image,
     },
     {
         title: 'Categorías',
-        href: adminCategoriesIndex(),
+        href: adminCategoriesIndex.url(),
         icon: Tags,
     },
     {
         title: 'Servicios',
-        href: adminServicesIndex(),
+        href: adminServicesIndex.url(),
         icon: Briefcase,
     },
     {
         title: 'Blog',
-        href: adminPostsIndex(),
+        href: adminPostsIndex.url(),
         icon: FileText,
     },
     {
         title: 'Testimonios',
-        href: adminTestimonialsIndex(),
+        href: adminTestimonialsIndex.url(),
         icon: MessageSquare,
     },
 ];
@@ -70,7 +86,7 @@ const mainNavItems: NavItem[] = [
 const footerNavItems: NavItem[] = [
     {
         title: 'Configuración',
-        href: adminSettingsIndex(),
+        href: adminSettingsIndex.url(),
         icon: Settings,
     },
 ];
@@ -81,10 +97,14 @@ export function AppSidebar() {
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
-                            <Link href={adminDashboard()} prefetch>
-                                <AppLogo />
-                            </Link>
+                        <SidebarMenuButton 
+                            size="lg" 
+                            onClick={(e) => {
+                                e.preventDefault();
+                                router.visit(adminDashboard.url());
+                            }}
+                        >
+                            <AppLogo />
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>

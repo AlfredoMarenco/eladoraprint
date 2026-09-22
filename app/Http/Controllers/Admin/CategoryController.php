@@ -58,7 +58,14 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
-        $category->delete();
-        return redirect()->route('admin.categories.index')->with('success', 'Categoría eliminada.');
+        try {
+            $category->delete();
+            return redirect()->route('admin.categories.index')->with('success', 'Categoría eliminada.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() === '23000') {
+                return redirect()->route('admin.categories.index')->with('error', 'La categoría no se puede eliminar porque tiene proyectos asociados.');
+            }
+            throw $e;
+        }
     }
 }

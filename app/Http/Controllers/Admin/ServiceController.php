@@ -3,63 +3,76 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Service;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use App\Services\ImageUploadService;
 
 class ServiceController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $services = Service::orderBy('order')->paginate(10);
+        return Inertia::render('admin/services/index', [
+            'services' => $services
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return Inertia::render('admin/services/create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request, ImageUploadService $imageService)
     {
-        //
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'order' => 'integer',
+            'icon_path' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:2048',
+        ]);
+
+        if ($request->hasFile('icon_path')) {
+            $validated['icon_path'] = $imageService->handleUpload($request->file('icon_path'), 'services');
+        } else {
+            unset($validated['icon_path']);
+        }
+
+        Service::create($validated);
+
+        return redirect()->route('admin.services.index')->with('success', 'Servicio creado exitosamente.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit(Service $service)
     {
-        //
+        return Inertia::render('admin/services/edit', [
+            'service' => $service
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, Service $service, ImageUploadService $imageService)
     {
-        //
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'order' => 'integer',
+            'icon_path' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:2048',
+        ]);
+
+        if ($request->hasFile('icon_path')) {
+            $validated['icon_path'] = $imageService->handleUpload($request->file('icon_path'), 'services');
+        } else {
+            unset($validated['icon_path']);
+        }
+
+        $service->update($validated);
+
+        return redirect()->route('admin.services.index')->with('success', 'Servicio actualizado exitosamente.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(Service $service)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $service->delete();
+        return redirect()->route('admin.services.index')->with('success', 'Servicio eliminado.');
     }
 }

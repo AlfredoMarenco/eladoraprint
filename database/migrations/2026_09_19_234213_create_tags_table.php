@@ -20,7 +20,7 @@ return new class extends Migration
 
         Schema::create('project_tag', function (Blueprint $table) {
             $table->foreignId('project_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('tag_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('tag_id')->constrained()->restrictOnDelete();
             $table->primary(['project_id', 'tag_id']);
         });
     }

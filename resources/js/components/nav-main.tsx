@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import {
     SidebarGroup,
     SidebarGroupLabel,
@@ -19,14 +19,15 @@ export function NavMain({ items }: { items: NavItem[] }) {
                 {items.map((item) => (
                     <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton
-                            asChild
                             isActive={isCurrentUrl(item.href)}
                             tooltip={{ children: item.title }}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                router.visit(item.href);
+                            }}
                         >
-                            <Link href={item.href} prefetch>
-                                {item.icon && <item.icon />}
-                                <span>{item.title}</span>
-                            </Link>
+                            {item.icon && <item.icon />}
+                            <span>{item.title}</span>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 ))}

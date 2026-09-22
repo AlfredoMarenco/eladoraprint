@@ -18,7 +18,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // $this->call(UserSeeder::class); // We skip users as requested
+        $this->call(RolesAndPermissionsSeeder::class);
+
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@eladoraprint.com'],
+            ['name' => 'Administrador', 'password' => bcrypt('password')]
+        );
+        $admin->assignRole('Admin');
+
+        // Create Customers
+        User::factory(10)->create()->each(function ($user) {
+            $user->assignRole('Customer');
+        });
 
         // Create Categories and Projects
         Category::factory(5)->create()->each(function ($category) {
@@ -41,5 +52,23 @@ class DatabaseSeeder extends Seeder
 
         // Create Testimonials
         Testimonial::factory(5)->create();
+
+        // Create Products
+        $products = \App\Models\Product::factory(15)->create();
+
+        // Create Orders
+        \App\Models\Order::factory(10)->create()->each(function ($order) use ($products) {
+            // Attach 1 to 3 items per order
+            $orderProducts = $products->random(rand(1, 3));
+            foreach ($orderProducts as $product) {
+                \App\Models\OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $product->id,
+                    'product_name' => $product->name,
+                    'quantity' => rand(1, 5),
+                    'unit_price' => $product->base_price,
+                ]);
+            }
+        });
     }
 }

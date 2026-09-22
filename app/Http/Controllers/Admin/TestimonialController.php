@@ -3,63 +3,76 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Testimonial;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use App\Services\ImageUploadService;
 
 class TestimonialController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $testimonials = Testimonial::latest()->paginate(10);
+        return Inertia::render('admin/testimonials/index', [
+            'testimonials' => $testimonials
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return Inertia::render('admin/testimonials/create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request, ImageUploadService $imageService)
     {
-        //
+        $validated = $request->validate([
+            'client_name' => 'required|string|max:255',
+            'company' => 'nullable|string|max:255',
+            'content' => 'required|string',
+            'is_active' => 'boolean',
+            'avatar_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        if ($request->hasFile('avatar_image')) {
+            $validated['avatar_image'] = $imageService->handleUpload($request->file('avatar_image'), 'testimonials');
+        }
+
+        Testimonial::create($validated);
+
+        return redirect()->route('admin.testimonials.index')->with('success', 'Testimonio creado exitosamente.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit(Testimonial $testimonial)
     {
-        //
+        return Inertia::render('admin/testimonials/edit', [
+            'testimonial' => $testimonial
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, Testimonial $testimonial, ImageUploadService $imageService)
     {
-        //
+        $validated = $request->validate([
+            'client_name' => 'required|string|max:255',
+            'company' => 'nullable|string|max:255',
+            'content' => 'required|string',
+            'is_active' => 'boolean',
+            'avatar_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        if ($request->hasFile('avatar_image')) {
+            $validated['avatar_image'] = $imageService->handleUpload($request->file('avatar_image'), 'testimonials');
+        } else {
+            unset($validated['avatar_image']);
+        }
+
+        $testimonial->update($validated);
+
+        return redirect()->route('admin.testimonials.index')->with('success', 'Testimonio actualizado exitosamente.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(Testimonial $testimonial)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $testimonial->delete();
+        return redirect()->route('admin.testimonials.index')->with('success', 'Testimonio eliminado.');
     }
 }
