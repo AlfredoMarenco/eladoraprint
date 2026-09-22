@@ -1,7 +1,7 @@
 import { Link, router } from '@inertiajs/react';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { ReactNode, useState, useEffect } from 'react';
-import { ShoppingCart, Trash2, X } from 'lucide-react';
+import { ShoppingCart, Trash2, X, Menu } from 'lucide-react';
 import { useCartStore } from '@/stores/useCartStore';
 import {
     Sheet,
@@ -115,6 +115,31 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
                                         </Button>
                                     </div>
                                 )}
+                            </SheetContent>
+                        </Sheet>
+
+                        {/* Mobile Navigation Menu */}
+                        <Sheet>
+                            <SheetTrigger asChild>
+                                <button className="md:hidden p-2 text-[#3E362E] hover:bg-muted rounded-full transition-colors">
+                                    <Menu className="h-6 w-6" />
+                                </button>
+                            </SheetTrigger>
+                            <SheetContent side="left" className="bg-[#F9F6EE] w-[300px] p-6 pt-12">
+                                <SheetHeader className="mb-6 p-0">
+                                    <SheetTitle className="text-left">
+                                        <AppLogoIcon className="h-10 w-auto object-contain mix-blend-multiply" />
+                                    </SheetTitle>
+                                </SheetHeader>
+                                <nav className="flex flex-col">
+                                    <Link href="/portfolio" className="hover:text-[#D4AF37] transition-colors border-b border-[#3E362E]/10 py-4 text-xl font-medium">Portafolio</Link>
+                                    <Link href="/shop" className="hover:text-[#D4AF37] transition-colors border-b border-[#3E362E]/10 py-4 text-xl font-medium">Tienda</Link>
+                                    <Link href="/blog" className="hover:text-[#D4AF37] transition-colors border-b border-[#3E362E]/10 py-4 text-xl font-medium">Blog</Link>
+                                    <Link href="/about" className="hover:text-[#D4AF37] transition-colors border-b border-[#3E362E]/10 py-4 text-xl font-medium">Sobre Mí</Link>
+                                    <a href="mailto:contacto@eladoraprint.com" className="mt-8 flex items-center justify-center rounded-full bg-[#3E362E] px-6 py-4 text-lg font-medium text-[#F9F6EE] shadow transition-colors hover:bg-[#3E362E]/90 focus-visible:outline-none">
+                                        Contáctame
+                                    </a>
+                                </nav>
                             </SheetContent>
                         </Sheet>
 
