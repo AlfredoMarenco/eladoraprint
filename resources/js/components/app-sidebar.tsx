@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, Image, Tags, FileText, MessageSquare, Briefcase, Settings, ShoppingCart, Package } from 'lucide-react';
+import { BookOpen, FolderGit2, LayoutGrid, Image, Tags, FileText, MessageSquare, Briefcase, Settings, ShoppingCart, Package, LayoutTemplate } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -16,6 +16,9 @@ import {
 import { 
     index as adminProjectsIndex,
 } from '@/routes/admin/projects';
+import { 
+    index as adminPagesIndex,
+} from '@/routes/admin/pages';
 import { 
     index as adminCategoriesIndex,
 } from '@/routes/admin/categories';
@@ -45,6 +48,11 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: adminDashboard.url(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Páginas (Builder)',
+        href: adminPagesIndex.url(),
+        icon: LayoutTemplate,
     },
     {
         title: 'Órdenes',

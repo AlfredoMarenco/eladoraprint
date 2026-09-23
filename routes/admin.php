@@ -9,9 +9,11 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\PageController;
 
 Route::inertia('/', 'dashboard')->name('dashboard');
 
+Route::resource('pages', PageController::class);
 Route::resource('projects', ProjectController::class);
 Route::resource('categories', CategoryController::class);
 Route::resource('posts', PostController::class);

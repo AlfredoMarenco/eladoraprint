@@ -31,18 +31,18 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
     return (
         <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-[#D4AF37]/20">
             {/* Header / Navbar */}
-            <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
+            <header className="sticky top-0 z-50 w-full border-b border-[#1A1A1A]/5 bg-[#FAF7F2]/90 backdrop-blur-md">
                 <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
                     <div className="flex items-center gap-2">
                         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                             <AppLogoIcon className="h-14 w-auto object-contain mix-blend-multiply" />
                         </Link>
                     </div>
-                    <nav className="hidden md:flex gap-8 items-center text-sm font-medium">
-                        <Link href="/portfolio" className="hover:text-[#D4AF37] transition-colors">Portafolio</Link>
-                        <Link href="/shop" className="hover:text-[#D4AF37] transition-colors">Tienda</Link>
-                        <Link href="/blog" className="hover:text-[#D4AF37] transition-colors">Blog</Link>
-                        <Link href="/about" className="hover:text-[#D4AF37] transition-colors">Sobre Mí</Link>
+                    <nav className="hidden md:flex gap-8 items-center text-sm font-medium text-[#1A1A1A]">
+                        <Link href="/portfolio" className="hover:text-[#D4A853] transition-colors">Portafolio</Link>
+                        <Link href="/shop" className="hover:text-[#D4A853] transition-colors">Tienda</Link>
+                        <Link href="/blog" className="hover:text-[#D4A853] transition-colors">Blog</Link>
+                        <Link href="/about" className="hover:text-[#D4A853] transition-colors">Sobre Mí</Link>
                     </nav>
                     <div className="flex items-center gap-4">
                         <Sheet open={open} onOpenChange={setOpen}>

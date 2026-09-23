@@ -31,6 +31,10 @@ Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])-
 
 // Webhooks
 Route::post('/webhooks/mercadopago', [WebhookController::class, 'handleMercadoPago'])->name('webhooks.mercadopago');
-
+// Dynamic Pages (Catch-all)
+Route::fallback(function (\Illuminate\Http\Request $request) {
+    $slug = trim($request->path(), '/');
+    return app(\App\Http\Controllers\PublicController::class)->page($slug);
+});
 
 require __DIR__.'/settings.php';

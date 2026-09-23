@@ -13,19 +13,19 @@ class PublicController extends Controller
 {
     public function home()
     {
-        $featuredProjects = Project::with('category')
+        $page = \App\Models\Page::where('slug', 'home')
             ->where('is_published', true)
-            ->latest()
-            ->take(6)
-            ->get();
-            
-        $services = Service::latest()->take(3)->get();
-        $testimonials = Testimonial::where('is_active', true)->latest()->take(3)->get();
-        
+            ->first();
+
+        // Si por alguna razón no se ha migrado la página home, cargamos una vacía
+        if (!$page) {
+            $page = clone new \App\Models\Page();
+            $page->title = 'Inicio';
+            $page->content = [];
+        }
+
         return Inertia::render('public/home', [
-            'featuredProjects' => $featuredProjects,
-            'services' => $services,
-            'testimonials' => $testimonials
+            'page' => $page
         ]);
     }
 
@@ -78,5 +78,16 @@ class PublicController extends Controller
     public function about()
     {
         return Inertia::render('public/about');
+    }
+
+    public function page($slug)
+    {
+        $page = \App\Models\Page::where('slug', $slug)
+            ->where('is_published', true)
+            ->firstOrFail();
+
+        return Inertia::render('public/page', [
+            'page' => $page
+        ]);
     }
 }
