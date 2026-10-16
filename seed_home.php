@@ -1,11 +1,14 @@
 <?php
 
+use App\Models\Page;
+use Illuminate\Contracts\Console\Kernel;
+
 require __DIR__.'/vendor/autoload.php';
 $app = require_once __DIR__.'/bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel = $app->make(Kernel::class);
 $kernel->bootstrap();
 
-$page = \App\Models\Page::firstOrNew(['slug' => 'home']);
+$page = Page::firstOrNew(['slug' => 'home']);
 $page->title = 'Inicio';
 $page->seo_description = 'Imprenta Boutique y Diseño Gráfico Premium.';
 $page->is_published = true;

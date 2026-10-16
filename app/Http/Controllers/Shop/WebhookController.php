@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Shop;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Order;
-use MercadoPago\MercadoPagoConfig;
-use MercadoPago\Client\Payment\PaymentClient;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use MercadoPago\Client\Payment\PaymentClient;
+use MercadoPago\MercadoPagoConfig;
 
 class WebhookController extends Controller
 {
@@ -19,20 +19,20 @@ class WebhookController extends Controller
             MercadoPagoConfig::setAccessToken(config('services.mercadopago.access_token'));
 
             $topic = $request->query('topic') ?? $request->input('type');
-            
+
             if ($topic === 'payment') {
                 $paymentId = $request->query('id') ?? $request->input('data.id');
-                
+
                 if ($paymentId) {
-                    $client = new PaymentClient();
+                    $client = new PaymentClient;
                     $payment = $client->get($paymentId);
 
                     if ($payment && $payment->status === 'approved') {
                         // El external_reference contiene nuestro order_number
                         $orderNumber = $payment->external_reference;
-                        
+
                         $order = Order::where('order_number', $orderNumber)->first();
-                        
+
                         if ($order && $order->payment_status !== 'paid') {
                             $order->update([
                                 'payment_status' => 'paid',
@@ -47,7 +47,8 @@ class WebhookController extends Controller
             return response()->json(['status' => 'success'], 200);
 
         } catch (\Exception $e) {
-            Log::error('Error procesando webhook MP: ' . $e->getMessage());
+            Log::error('Error procesando webhook MP: '.$e->getMessage());
+
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }

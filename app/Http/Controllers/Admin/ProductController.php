@@ -4,18 +4,20 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Str;
 use App\Services\ImageUploadService;
+use Illuminate\Database\QueryException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class ProductController extends Controller
 {
     public function index()
     {
         $products = Product::with('images')->latest()->paginate(10);
+
         return Inertia::render('admin/products/index', [
-            'products' => $products
+            'products' => $products,
         ]);
     }
 
@@ -46,7 +48,7 @@ class ProductController extends Controller
                 $product->images()->create([
                     'image_path' => $path,
                     'is_primary' => $index === 0,
-                    'order' => $index
+                    'order' => $index,
                 ]);
             }
         }
@@ -57,8 +59,9 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         $product->load(['images', 'variations']);
+
         return Inertia::render('admin/products/edit', [
-            'product' => $product
+            'product' => $product,
         ]);
     }
 
@@ -85,7 +88,7 @@ class ProductController extends Controller
                 $product->images()->create([
                     'image_path' => $path,
                     'is_primary' => false,
-                    'order' => $lastOrder + 1 + $index
+                    'order' => $lastOrder + 1 + $index,
                 ]);
             }
         }
@@ -97,8 +100,9 @@ class ProductController extends Controller
     {
         try {
             $product->delete();
+
             return redirect()->route('admin.products.index')->with('success', 'Producto eliminado.');
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             if ($e->getCode() === '23000') {
                 return redirect()->route('admin.products.index')->with('error', 'El producto no se puede eliminar porque tiene otros elementos asociados (como órdenes).');
             }

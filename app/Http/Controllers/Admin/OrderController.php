@@ -3,25 +3,28 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\Order;
 
 class OrderController extends Controller
 {
     public function index()
     {
         $orders = Order::latest()->paginate(10);
+
         return Inertia::render('admin/orders/index', [
-            'orders' => $orders
+            'orders' => $orders,
         ]);
     }
 
     public function show(Order $order)
     {
         $order->load('items.product');
+
         return Inertia::render('admin/orders/show', [
-            'order' => $order
+            'order' => $order,
         ]);
     }
 
@@ -29,7 +32,7 @@ class OrderController extends Controller
     {
         $validated = $request->validate([
             'status' => 'required|in:pending,processing,shipped,delivered,cancelled',
-            'payment_status' => 'required|in:pending,paid,failed,refunded'
+            'payment_status' => 'required|in:pending,paid,failed,refunded',
         ]);
 
         $order->update($validated);
@@ -41,8 +44,9 @@ class OrderController extends Controller
     {
         try {
             $order->delete();
+
             return redirect()->route('admin.orders.index')->with('success', 'Orden eliminada');
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             if ($e->getCode() === '23000') {
                 return redirect()->route('admin.orders.index')->with('error', 'La orden no se puede eliminar porque tiene elementos asociados.');
             }

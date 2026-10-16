@@ -4,17 +4,18 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Testimonial;
+use App\Services\ImageUploadService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Services\ImageUploadService;
 
 class TestimonialController extends Controller
 {
     public function index()
     {
         $testimonials = Testimonial::latest()->paginate(10);
+
         return Inertia::render('admin/testimonials/index', [
-            'testimonials' => $testimonials
+            'testimonials' => $testimonials,
         ]);
     }
 
@@ -45,7 +46,7 @@ class TestimonialController extends Controller
     public function edit(Testimonial $testimonial)
     {
         return Inertia::render('admin/testimonials/edit', [
-            'testimonial' => $testimonial
+            'testimonial' => $testimonial,
         ]);
     }
 
@@ -73,6 +74,7 @@ class TestimonialController extends Controller
     public function destroy(Testimonial $testimonial)
     {
         $testimonial->delete();
+
         return redirect()->route('admin.testimonials.index')->with('success', 'Testimonio eliminado.');
     }
 }

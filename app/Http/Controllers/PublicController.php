@@ -2,30 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use App\Models\Project;
+use App\Models\Page;
 use App\Models\Post;
-use App\Models\Service;
-use App\Models\Testimonial;
+use App\Models\Project;
+use Inertia\Inertia;
 
 class PublicController extends Controller
 {
     public function home()
     {
-        $page = \App\Models\Page::where('slug', 'home')
+        $page = Page::where('slug', 'home')
             ->where('is_published', true)
             ->first();
 
         // Si por alguna razón no se ha migrado la página home, cargamos una vacía
-        if (!$page) {
-            $page = clone new \App\Models\Page();
+        if (! $page) {
+            $page = clone new Page;
             $page->title = 'Inicio';
             $page->content = [];
         }
 
         return Inertia::render('public/home', [
-            'page' => $page
+            'page' => $page,
         ]);
     }
 
@@ -35,9 +33,9 @@ class PublicController extends Controller
             ->where('is_published', true)
             ->latest()
             ->paginate(12);
-            
+
         return Inertia::render('public/portfolio/index', [
-            'projects' => $projects
+            'projects' => $projects,
         ]);
     }
 
@@ -47,9 +45,9 @@ class PublicController extends Controller
             ->where('slug', $slug)
             ->where('is_published', true)
             ->firstOrFail();
-            
+
         return Inertia::render('public/portfolio/show', [
-            'project' => $project
+            'project' => $project,
         ]);
     }
 
@@ -58,9 +56,9 @@ class PublicController extends Controller
         $posts = Post::where('is_published', true)
             ->latest('published_at')
             ->paginate(9);
-            
+
         return Inertia::render('public/blog/index', [
-            'posts' => $posts
+            'posts' => $posts,
         ]);
     }
 
@@ -69,9 +67,9 @@ class PublicController extends Controller
         $post = Post::where('slug', $slug)
             ->where('is_published', true)
             ->firstOrFail();
-            
+
         return Inertia::render('public/blog/show', [
-            'post' => $post
+            'post' => $post,
         ]);
     }
 
@@ -82,12 +80,12 @@ class PublicController extends Controller
 
     public function page($slug)
     {
-        $page = \App\Models\Page::where('slug', $slug)
+        $page = Page::where('slug', $slug)
             ->where('is_published', true)
             ->firstOrFail();
 
         return Inertia::render('public/page', [
-            'page' => $page
+            'page' => $page,
         ]);
     }
 }

@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'category_id', 'title', 'slug', 'description', 'client', 'role',
-        'project_url', 'video_url', 'completion_date', 'is_published', 'cover_image'
+        'project_url', 'video_url', 'completion_date', 'is_published', 'cover_image',
     ];
 
     protected $casts = [

@@ -1,19 +1,20 @@
 <?php
 
-require __DIR__ . '/vendor/autoload.php';
-$app = require_once __DIR__ . '/bootstrap/app.php';
-$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+require __DIR__.'/vendor/autoload.php';
+$app = require_once __DIR__.'/bootstrap/app.php';
+$app->make(Kernel::class)->bootstrap();
 
-use Intervention\Image\ImageManager;
+use Illuminate\Contracts\Console\Kernel;
 use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
-$manager = new ImageManager(new Driver());
+$manager = new ImageManager(new Driver);
 
 $source = public_path('images/logo.png');
 
 if (file_exists($source)) {
     $image = $manager->read($source);
-    
+
     // Favicon.ico (typically 32x32 or 16x16, let's do 32x32)
     $image->scale(32, 32);
     // Note: Intervention v3 doesn't natively encode to .ico, we can just save it as PNG but named .ico, browsers support this usually.

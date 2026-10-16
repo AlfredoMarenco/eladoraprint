@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class OrderItem extends Model
 {
     protected $guarded = [];
-    
+
     protected $casts = [
         'selected_variations' => 'array',
     ];

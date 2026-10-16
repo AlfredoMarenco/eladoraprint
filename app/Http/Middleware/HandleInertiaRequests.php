@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\BusinessSetting;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -35,11 +36,29 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user ? [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'roles' => $user->getRoleNames(),
+                    'is_admin' => $user->hasAnyRole(['Admin', 'Administradora']),
+                ] : null,
+            ],
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+                'info' => $request->session()->get('info'),
+            ],
+            'crm_settings' => [
+                'currency' => BusinessSetting::get('default_currency', 'MXN'),
+                'company_name' => BusinessSetting::get('company_name', 'Eladora'),
+                'date_format' => BusinessSetting::get('date_format', 'd/m/Y'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

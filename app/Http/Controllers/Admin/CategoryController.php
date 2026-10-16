@@ -4,17 +4,19 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class CategoryController extends Controller
 {
     public function index()
     {
         $categories = Category::withCount('projects')->latest()->paginate(10);
+
         return Inertia::render('admin/categories/index', [
-            'categories' => $categories
+            'categories' => $categories,
         ]);
     }
 
@@ -29,7 +31,7 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
-        
+
         $validated['slug'] = Str::slug($validated['name']);
         Category::create($validated);
 
@@ -39,7 +41,7 @@ class CategoryController extends Controller
     public function edit(Category $category)
     {
         return Inertia::render('admin/categories/edit', [
-            'category' => $category
+            'category' => $category,
         ]);
     }
 
@@ -49,7 +51,7 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
-        
+
         $validated['slug'] = Str::slug($validated['name']);
         $category->update($validated);
 
@@ -60,8 +62,9 @@ class CategoryController extends Controller
     {
         try {
             $category->delete();
+
             return redirect()->route('admin.categories.index')->with('success', 'Categoría eliminada.');
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             if ($e->getCode() === '23000') {
                 return redirect()->route('admin.categories.index')->with('error', 'La categoría no se puede eliminar porque tiene proyectos asociados.');
             }

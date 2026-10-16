@@ -4,18 +4,19 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Post;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Str;
 use App\Services\ImageUploadService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class PostController extends Controller
 {
     public function index()
     {
         $posts = Post::latest()->paginate(10);
+
         return Inertia::render('admin/posts/index', [
-            'posts' => $posts
+            'posts' => $posts,
         ]);
     }
 
@@ -49,7 +50,7 @@ class PostController extends Controller
     public function edit(Post $post)
     {
         return Inertia::render('admin/posts/edit', [
-            'post' => $post
+            'post' => $post,
         ]);
     }
 
@@ -64,10 +65,10 @@ class PostController extends Controller
         ]);
 
         $validated['slug'] = Str::slug($validated['title']);
-        
-        if ($validated['is_published'] && !$post->is_published) {
+
+        if ($validated['is_published'] && ! $post->is_published) {
             $validated['published_at'] = now();
-        } elseif (!$validated['is_published']) {
+        } elseif (! $validated['is_published']) {
             $validated['published_at'] = null;
         }
 
@@ -85,6 +86,7 @@ class PostController extends Controller
     public function destroy(Post $post)
     {
         $post->delete();
+
         return redirect()->route('admin.posts.index')->with('success', 'Artículo eliminado.');
     }
 }

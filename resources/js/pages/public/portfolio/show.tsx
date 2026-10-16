@@ -63,7 +63,7 @@ export default function Show({ project }: any) {
                         
                         {/* Sidebar Details */}
                         <div className="lg:col-span-1">
-                            <ScrollReveal animation="fade-left" delay={300} className="sticky top-28 bg-background p-8 rounded-sm border border-border/40 shadow-sm">
+                            <ScrollReveal animation="slide-left" delay={300} className="sticky top-28 bg-background p-8 rounded-sm border border-border/40 shadow-sm">
                                 <h3 className="text-xl font-light font-serif mb-6 pb-4 border-b border-border/50 text-foreground">Detalles del Proyecto</h3>
                                 
                                 <dl className="space-y-6">

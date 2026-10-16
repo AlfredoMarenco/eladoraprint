@@ -20,7 +20,7 @@ export default function Create() {
     return (
         <>
             <Head title="Crear Categoría - Admin" />
-            <div className="flex h-full flex-1 flex-col gap-6 p-6 max-w-2xl mx-auto w-full">
+            <div className="flex h-full flex-1 flex-col gap-6 p-6 w-full">
                 <div className="flex items-center gap-4">
                     <Button variant="outline" size="icon" asChild>
                         <Link href={adminCategoriesIndex()}>

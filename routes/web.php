@@ -1,16 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PublicController;
-use App\Http\Controllers\Admin\ProjectController;
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\PostController;
-use App\Http\Controllers\Admin\TestimonialController;
-use App\Http\Controllers\Admin\ServiceController;
-use App\Http\Controllers\Admin\SettingController;
-use App\Http\Controllers\ShopController;
 use App\Http\Controllers\Shop\CheckoutController;
 use App\Http\Controllers\Shop\WebhookController;
+use App\Http\Controllers\ShopController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 // Public Routes
 Route::get('/', [PublicController::class, 'home'])->name('home');
@@ -32,9 +27,10 @@ Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])-
 // Webhooks
 Route::post('/webhooks/mercadopago', [WebhookController::class, 'handleMercadoPago'])->name('webhooks.mercadopago');
 // Dynamic Pages (Catch-all)
-Route::fallback(function (\Illuminate\Http\Request $request) {
+Route::fallback(function (Request $request) {
     $slug = trim($request->path(), '/');
-    return app(\App\Http\Controllers\PublicController::class)->page($slug);
+
+    return app(PublicController::class)->page($slug);
 });
 
 require __DIR__.'/settings.php';

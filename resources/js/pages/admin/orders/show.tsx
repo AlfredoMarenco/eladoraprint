@@ -32,7 +32,7 @@ export default function OrderShow({ order }: { order: any }) {
         <>
             <Head title={`Orden ${order.order_number}`} />
             
-            <div className="flex flex-col gap-6 p-4 max-w-5xl">
+            <div className="flex flex-col gap-6 p-4 w-full">
                 <div className="flex items-center justify-between">
                     <div>
                         <h2 className="text-2xl font-semibold flex items-center gap-2">

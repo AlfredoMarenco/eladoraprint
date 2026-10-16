@@ -2,13 +2,16 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Category;
-use App\Models\Project;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Post;
+use App\Models\Product;
+use App\Models\Project;
 use App\Models\Service;
-use App\Models\Testimonial;
 use App\Models\Tag;
+use App\Models\Testimonial;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -54,14 +57,14 @@ class DatabaseSeeder extends Seeder
         Testimonial::factory(5)->create();
 
         // Create Products
-        $products = \App\Models\Product::factory(15)->create();
+        $products = Product::factory(15)->create();
 
         // Create Orders
-        \App\Models\Order::factory(10)->create()->each(function ($order) use ($products) {
+        Order::factory(10)->create()->each(function ($order) use ($products) {
             // Attach 1 to 3 items per order
             $orderProducts = $products->random(rand(1, 3));
             foreach ($orderProducts as $product) {
-                \App\Models\OrderItem::create([
+                OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $product->id,
                     'product_name' => $product->name,

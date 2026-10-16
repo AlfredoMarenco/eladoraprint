@@ -173,22 +173,3 @@ export default function ProductEdit({ product }: { product: any }) {
         </>
     );
 }
-
-// Para inyectar el layout con los breadcrumbs dinámicos, lo hacemos con una función o componente en este caso
-// @ts-ignore
-ProductEdit.layout = (page: React.ReactNode) => {
-    // We can't access `product` here easily, so we can just set basic layout breadcrumbs in the component above
-    // or just pass a generic one here, and the component renders its own if needed.
-    // To avoid duplication, we just return the layout without breadcrumbs since we already removed AppLayout wrapper.
-    // Wait, since we removed the AppLayout wrapper from the component return, we DO need to provide the layout object!
-    return page;
-};
-
-// Actually, let's just use the object format for layout and we'll use a static "Editar Producto" breadcrumb
-ProductEdit.layout = {
-    breadcrumbs: [
-        { title: 'Dashboard', href: admin.dashboard() },
-        { title: 'Productos', href: admin.products.index() },
-        { title: 'Editar Producto', href: '#' },
-    ]
-};

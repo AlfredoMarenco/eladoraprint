@@ -65,7 +65,7 @@ export default function Edit({ page }: { page: any }) {
                     </div>
                 </div>
 
-                <div className="max-w-4xl mx-auto w-full mt-6">
+                <div className="w-full mt-6">
                     {activeTab === 'settings' && (
                         <Card>
                             <CardHeader>

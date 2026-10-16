@@ -2,19 +2,20 @@
 
 namespace Database\Factories;
 
+use App\Models\Category;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
-use App\Models\Category;
 
 class ProjectFactory extends Factory
 {
     public function definition(): array
     {
         $title = fake()->unique()->sentence(4);
+
         return [
             'title' => $title,
             'slug' => Str::slug($title),
-            'description' => '<p>' . implode('</p><p>', fake()->paragraphs(3)) . '</p>',
+            'description' => '<p>'.implode('</p><p>', fake()->paragraphs(3)).'</p>',
             'client' => fake()->company(),
             'role' => fake()->jobTitle(),
             'project_url' => fake()->url(),

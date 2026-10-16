@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Inertia\Inertia;
 use App\Models\Product;
+use Inertia\Inertia;
 
 class ShopController extends Controller
 {
@@ -17,7 +16,7 @@ class ShopController extends Controller
             ->paginate(12);
 
         return Inertia::render('public/shop/index', [
-            'products' => $products
+            'products' => $products,
         ]);
     }
 
@@ -38,7 +37,7 @@ class ShopController extends Controller
 
         return Inertia::render('public/shop/show', [
             'product' => $product,
-            'relatedProducts' => $relatedProducts
+            'relatedProducts' => $relatedProducts,
         ]);
     }
 }

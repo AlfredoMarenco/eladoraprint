@@ -18,7 +18,9 @@ export default defineConfig({
                 }),
             ],
         }),
-        inertia(),
+        inertia({
+            ssr: process.env.INERTIA_SSR_ENABLED === 'true',
+        }),
         react(),
         babel({
             presets: [reactCompilerPreset()],

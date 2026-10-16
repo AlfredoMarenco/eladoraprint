@@ -3,29 +3,31 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Project;
 use App\Models\Category;
-use App\Models\ProjectImage;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Str;
+use App\Models\Project;
 use App\Services\ImageUploadService;
+use Illuminate\Database\QueryException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class ProjectController extends Controller
 {
     public function index()
     {
         $projects = Project::with('category')->latest()->paginate(10);
+
         return Inertia::render('admin/projects/index', [
-            'projects' => $projects
+            'projects' => $projects,
         ]);
     }
 
     public function create()
     {
         $categories = Category::all();
+
         return Inertia::render('admin/projects/create', [
-            'categories' => $categories
+            'categories' => $categories,
         ]);
     }
 
@@ -58,7 +60,7 @@ class ProjectController extends Controller
                 $path = $imageService->handleUpload($image, 'projects/gallery');
                 $project->images()->create([
                     'image_path' => $path,
-                    'order' => $index
+                    'order' => $index,
                 ]);
             }
         }
@@ -70,9 +72,10 @@ class ProjectController extends Controller
     {
         $categories = Category::all();
         $project->load('images');
+
         return Inertia::render('admin/projects/edit', [
             'project' => $project,
-            'categories' => $categories
+            'categories' => $categories,
         ]);
     }
 
@@ -107,7 +110,7 @@ class ProjectController extends Controller
                 $path = $imageService->handleUpload($image, 'projects/gallery');
                 $project->images()->create([
                     'image_path' => $path,
-                    'order' => $lastOrder + 1 + $index
+                    'order' => $lastOrder + 1 + $index,
                 ]);
             }
         }
@@ -119,8 +122,9 @@ class ProjectController extends Controller
     {
         try {
             $project->delete();
+
             return redirect()->route('admin.projects.index')->with('success', 'Proyecto eliminado.');
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             if ($e->getCode() === '23000') {
                 return redirect()->route('admin.projects.index')->with('error', 'El proyecto no se puede eliminar porque tiene elementos asociados.');
             }

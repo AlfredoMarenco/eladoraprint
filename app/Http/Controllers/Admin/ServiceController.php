@@ -4,17 +4,18 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Service;
+use App\Services\ImageUploadService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Services\ImageUploadService;
 
 class ServiceController extends Controller
 {
     public function index()
     {
         $services = Service::orderBy('order')->paginate(10);
+
         return Inertia::render('admin/services/index', [
-            'services' => $services
+            'services' => $services,
         ]);
     }
 
@@ -46,7 +47,7 @@ class ServiceController extends Controller
     public function edit(Service $service)
     {
         return Inertia::render('admin/services/edit', [
-            'service' => $service
+            'service' => $service,
         ]);
     }
 
@@ -73,6 +74,7 @@ class ServiceController extends Controller
     public function destroy(Service $service)
     {
         $service->delete();
+
         return redirect()->route('admin.services.index')->with('success', 'Servicio eliminado.');
     }
 }

@@ -5,16 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Page;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class PageController extends Controller
 {
     public function index()
     {
         $pages = Page::latest()->paginate(10);
+
         return Inertia::render('admin/pages/index', [
-            'pages' => $pages
+            'pages' => $pages,
         ]);
     }
 
@@ -38,7 +39,7 @@ class PageController extends Controller
         } else {
             $validated['slug'] = Str::slug($validated['slug']);
         }
-        
+
         if (empty($validated['content'])) {
             $validated['content'] = [];
         }
@@ -51,7 +52,7 @@ class PageController extends Controller
     public function edit(Page $page)
     {
         return Inertia::render('admin/pages/edit', [
-            'page' => $page
+            'page' => $page,
         ]);
     }
 
@@ -59,7 +60,7 @@ class PageController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:pages,slug,' . $page->id,
+            'slug' => 'nullable|string|max:255|unique:pages,slug,'.$page->id,
             'seo_description' => 'nullable|string',
             'is_published' => 'boolean',
             'content' => 'nullable|array',
@@ -70,7 +71,7 @@ class PageController extends Controller
         } else {
             $validated['slug'] = Str::slug($validated['slug']);
         }
-        
+
         if (empty($validated['content'])) {
             $validated['content'] = [];
         }
@@ -83,6 +84,7 @@ class PageController extends Controller
     public function destroy(Page $page)
     {
         $page->delete();
+
         return redirect()->route('admin.pages.index')->with('success', 'Página eliminada.');
     }
 }

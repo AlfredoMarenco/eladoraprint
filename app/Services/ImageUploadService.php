@@ -4,28 +4,27 @@ namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class ImageUploadService
 {
     /**
      * Sube, redimensiona y convierte una imagen a WebP.
      *
-     * @param UploadedFile $file
-     * @param string $path Carpeta de destino (ej: 'projects', 'posts')
-     * @param int $maxWidth Ancho máximo
-     * @param int $quality Calidad WebP (0-100)
+     * @param  string  $path  Carpeta de destino (ej: 'projects', 'posts')
+     * @param  int  $maxWidth  Ancho máximo
+     * @param  int  $quality  Calidad WebP (0-100)
      * @return string Ruta relativa del archivo guardado en el storage
      */
     public function uploadAndOptimize(UploadedFile $file, string $path, int $maxWidth = 1920, int $quality = 80): string
     {
         // Generar un nombre único
-        $filename = uniqid() . '_' . time() . '.webp';
-        $fullPath = $path . '/' . $filename;
+        $filename = uniqid().'_'.time().'.webp';
+        $fullPath = $path.'/'.$filename;
 
         // Crear una instancia de Intervention Image Manager usando el driver GD
-        $manager = new ImageManager(new Driver());
+        $manager = new ImageManager(new Driver);
 
         // Leer la imagen subida
         $image = $manager->read($file->getRealPath());
