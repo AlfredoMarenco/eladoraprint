@@ -356,13 +356,13 @@ export default function QuotationsEdit({ quotation, clients }: Props) {
 }
 
 QuotationsEdit.layout = (page: any) => {
-    const quotation = page.props.quotation;
+    const quotation = page?.props?.quotation ?? page?.quotation;
     return (
         <AppLayout
             breadcrumbs={[
                 { title: 'Cotizaciones', href: '/admin/quotations' },
-                { title: quotation?.folio || 'Cotización', href: `/admin/quotations/${quotation?.id}` },
-                { title: 'Editar', href: `/admin/quotations/${quotation?.id}/edit` },
+                { title: quotation?.folio || 'Cotización', href: quotation?.id ? `/admin/quotations/${quotation.id}` : '/admin/quotations' },
+                { title: 'Editar', href: quotation?.id ? `/admin/quotations/${quotation.id}/edit` : '/admin/quotations' },
             ]}
         >
             {page}

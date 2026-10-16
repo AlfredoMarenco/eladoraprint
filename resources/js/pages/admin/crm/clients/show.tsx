@@ -471,7 +471,7 @@ export default function ClientsShow({ client, total_paid = 0, total_balance_due 
 }
 
 ClientsShow.layout = (page: any) => {
-    const client = page?.props?.client;
+    const client = page?.props?.client ?? page?.client;
     return (
         <AppLayout
             breadcrumbs={[

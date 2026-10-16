@@ -216,13 +216,13 @@ export default function ClientsEdit({ client }: Props) {
 }
 
 ClientsEdit.layout = (page: any) => {
-    const client = page.props.client;
+    const client = page?.props?.client ?? page?.client;
     return (
         <AppLayout
             breadcrumbs={[
                 { title: 'Clientes', href: '/admin/clients' },
-                { title: client?.name || 'Cliente', href: `/admin/clients/${client?.id}` },
-                { title: 'Editar', href: `/admin/clients/${client?.id}/edit` },
+                { title: client?.name || 'Cliente', href: client?.id ? `/admin/clients/${client.id}` : '/admin/clients' },
+                { title: 'Editar', href: client?.id ? `/admin/clients/${client.id}/edit` : '/admin/clients' },
             ]}
         >
             {page}

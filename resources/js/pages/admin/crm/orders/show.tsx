@@ -1395,13 +1395,13 @@ export default function CrmOrdersShow({ order, financial_summary, suppliers, use
     );
 }
 
-OrderShow.layout = (page: any) => {
-    const order = page.props.order;
+CrmOrdersShow.layout = (page: any) => {
+    const order = page?.props?.order ?? page?.order;
     return (
         <AppLayout
             breadcrumbs={[
                 { title: 'Pedidos', href: '/admin/crm-orders' },
-                { title: order?.folio || 'Pedido', href: `/admin/crm-orders/${order?.id}` },
+                { title: order?.folio || 'Pedido', href: order?.id ? `/admin/crm-orders/${order.id}` : '/admin/crm-orders' },
             ]}
         >
             {page}

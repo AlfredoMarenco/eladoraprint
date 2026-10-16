@@ -256,7 +256,7 @@ export default function CrmOrdersIndex({ orders, filters = {}, operating_statuse
     );
 }
 
-OrdersIndex.layout = (page: any) => (
+CrmOrdersIndex.layout = (page: any) => (
     <AppLayout breadcrumbs={[{ title: 'Pedidos', href: '/admin/crm-orders' }]}>
         {page}
     </AppLayout>

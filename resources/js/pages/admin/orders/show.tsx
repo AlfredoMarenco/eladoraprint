@@ -157,10 +157,11 @@ export default function OrderShow({ order }: { order: any }) {
 }
 
 OrderShow.layout = (page: any) => {
+    const order = page?.props?.order ?? page?.order;
     const breadcrumbs = [
         { title: 'Dashboard', href: admin.dashboard() },
         { title: 'Órdenes', href: admin.orders.index() },
-        { title: `Orden ${page.props.order.order_number}`, href: admin.orders.show(page.props.order.id) },
+        { title: order?.order_number ? `Orden ${order.order_number}` : 'Orden', href: order?.id ? admin.orders.show(order.id) : admin.orders.index() },
     ];
     return <AppLayout breadcrumbs={breadcrumbs}>{page}</AppLayout>;
 };

@@ -370,12 +370,12 @@ export default function QuotationsShow({ quotation, company_info }: Props) {
 }
 
 QuotationsShow.layout = (page: any) => {
-    const quotation = page.props.quotation;
+    const quotation = page?.props?.quotation ?? page?.quotation;
     return (
         <AppLayout
             breadcrumbs={[
                 { title: 'Cotizaciones', href: '/admin/quotations' },
-                { title: quotation?.folio || 'Cotización', href: `/admin/quotations/${quotation?.id}` },
+                { title: quotation?.folio || 'Cotización', href: quotation?.id ? `/admin/quotations/${quotation.id}` : '/admin/quotations' },
             ]}
         >
             {page}

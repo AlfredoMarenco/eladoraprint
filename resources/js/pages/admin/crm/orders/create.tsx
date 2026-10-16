@@ -7,18 +7,22 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MoneyDisplay } from '@/components/crm/money-display';
-import { ArrowLeft, Save, Sparkles } from 'lucide-react';
+import { ArrowLeft, Save, Sparkles, UserPlus } from 'lucide-react';
 import type { Universe } from '@/types/crm';
 
 interface Props {
-    clients: Array<{ id: number; name: string; business_name?: string | null; phone?: string | null }>;
-    users: Array<{ id: number; name: string }>;
-    default_advance_percent: number;
-    workshop_overhead_value: number;
+    clients?: Array<{ id: number; name: string; business_name?: string | null; phone?: string | null }>;
+    users?: Array<{ id: number; name: string }>;
+    default_advance_percent?: number;
+    workshop_overhead_value?: number;
 }
 
-export default function CrmOrdersCreate({ clients, users, default_advance_percent = 50, workshop_overhead_value = 15 }: Props) {
+export default function OrdersCreate({ 
+    clients = [], 
+    users = [], 
+    default_advance_percent = 50, 
+    workshop_overhead_value = 15 
+}: Props) {
     const today = new Date().toISOString().split('T')[0];
     const twoWeeks = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
@@ -82,11 +86,11 @@ export default function CrmOrdersCreate({ clients, users, default_advance_percen
             <div className="flex flex-col gap-6 p-6 w-full">
                 <div className="flex items-center justify-between pb-2 border-b border-border/50">
                     <div className="flex items-center gap-3">
-                        <Link href="/admin/crm-orders">
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                            <Link href="/admin/crm-orders">
                                 <ArrowLeft className="w-4 h-4" />
-                            </Button>
-                        </Link>
+                            </Link>
+                        </Button>
                         <div>
                             <h1 className="text-2xl font-serif font-bold text-foreground tracking-tight">
                                 Registrar Pedido Directo
@@ -107,7 +111,13 @@ export default function CrmOrdersCreate({ clients, users, default_advance_percen
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
-                                    <Label className="text-xs">Cliente <span className="text-red-500">*</span></Label>
+                                    <div className="flex items-center justify-between">
+                                        <Label className="text-xs">Cliente <span className="text-red-500">*</span></Label>
+                                        <Link href="/admin/clients/create" className="text-[11px] text-primary hover:underline flex items-center gap-1">
+                                            <UserPlus className="w-3 h-3" />
+                                            <span>Nuevo cliente</span>
+                                        </Link>
+                                    </div>
                                     <Select
                                         value={data.client_id}
                                         onValueChange={(val) => setData('client_id', val)}
@@ -116,11 +126,17 @@ export default function CrmOrdersCreate({ clients, users, default_advance_percen
                                             <SelectValue placeholder="Seleccionar cliente..." />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {clients.map((c) => (
-                                                <SelectItem key={c.id} value={String(c.id)}>
-                                                    {c.name} {c.business_name ? `(${c.business_name})` : ''}
+                                            {clients.length === 0 ? (
+                                                <SelectItem value="none" disabled>
+                                                    No hay clientes registrados
                                                 </SelectItem>
-                                            ))}
+                                            ) : (
+                                                clients.map((c) => (
+                                                    <SelectItem key={c.id} value={String(c.id)}>
+                                                        {c.name} {c.business_name ? `(${c.business_name})` : ''}
+                                                    </SelectItem>
+                                                ))
+                                            )}
                                         </SelectContent>
                                     </Select>
                                     {errors.client_id && <p className="text-xs text-red-500">{errors.client_id}</p>}
@@ -178,6 +194,25 @@ export default function CrmOrdersCreate({ clients, users, default_advance_percen
                                             <SelectItem value="medium">Media</SelectItem>
                                             <SelectItem value="high">Alta</SelectItem>
                                             <SelectItem value="urgent">Urgente</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-1.5 md:col-span-2">
+                                    <Label className="text-xs">Responsable del Pedido</Label>
+                                    <Select
+                                        value={data.assigned_to}
+                                        onValueChange={(val) => setData('assigned_to', val)}
+                                    >
+                                        <SelectTrigger className="w-full text-xs">
+                                            <SelectValue placeholder="Seleccionar colaborador asignado..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {users.map((u) => (
+                                                <SelectItem key={u.id} value={String(u.id)}>
+                                                    {u.name}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -323,9 +358,9 @@ export default function CrmOrdersCreate({ clients, users, default_advance_percen
                             </div>
 
                             <div className="flex justify-end gap-3 pt-4 border-t border-border/50">
-                                <Link href="/admin/crm-orders">
-                                    <Button variant="outline" type="button">Cancelar</Button>
-                                </Link>
+                                <Button variant="outline" type="button" asChild>
+                                    <Link href="/admin/crm-orders">Cancelar</Link>
+                                </Button>
                                 <Button type="submit" disabled={processing} className="gap-2">
                                     <Save className="w-4 h-4" />
                                     <span>Crear Pedido y Generar Tareas</span>

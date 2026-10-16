@@ -393,7 +393,7 @@ export default function CrmSettingsIndex({ settings, templates }: Props) {
     );
 }
 
-SettingsIndex.layout = (page: any) => (
+CrmSettingsIndex.layout = (page: any) => (
     <AppLayout breadcrumbs={[{ title: 'Configuración del CRM', href: '/admin/crm-settings' }]}>
         {page}
     </AppLayout>

@@ -107,12 +107,12 @@ export default function CrmDashboard({
                             ))}
                         </div>
 
-                        <Link href="/admin/crm-orders/create">
-                            <Button size="sm" className="gap-1.5 shadow-xs">
+                        <Button size="sm" className="gap-1.5 shadow-xs" asChild>
+                            <Link href="/admin/crm-orders/create">
                                 <PlusCircle className="w-4 h-4" />
                                 <span>Nuevo Pedido</span>
-                            </Button>
-                        </Link>
+                            </Link>
+                        </Button>
                     </div>
                 </div>
 
@@ -476,36 +476,36 @@ export default function CrmDashboard({
                                 <CardDescription>Herramientas de uso frecuente</CardDescription>
                             </CardHeader>
                             <CardContent className="flex flex-col gap-2">
-                                <Link href="/admin/crm-orders/create">
-                                    <Button variant="outline" className="w-full justify-start gap-2 text-xs">
+                                <Button variant="outline" className="w-full justify-start gap-2 text-xs" asChild>
+                                    <Link href="/admin/crm-orders/create">
                                         <PlusCircle className="w-4 h-4 text-emerald-600" />
                                         <span>Registrar nuevo pedido</span>
-                                    </Button>
-                                </Link>
-                                <Link href="/admin/clients/create">
-                                    <Button variant="outline" className="w-full justify-start gap-2 text-xs">
+                                    </Link>
+                                </Button>
+                                <Button variant="outline" className="w-full justify-start gap-2 text-xs" asChild>
+                                    <Link href="/admin/clients/create">
                                         <UserPlus className="w-4 h-4 text-blue-600" />
                                         <span>Alta de nuevo cliente</span>
-                                    </Button>
-                                </Link>
-                                <Link href="/admin/quotations/create">
-                                    <Button variant="outline" className="w-full justify-start gap-2 text-xs">
+                                    </Link>
+                                </Button>
+                                <Button variant="outline" className="w-full justify-start gap-2 text-xs" asChild>
+                                    <Link href="/admin/quotations/create">
                                         <FileText className="w-4 h-4 text-purple-600" />
                                         <span>Crear cotización formal</span>
-                                    </Button>
-                                </Link>
-                                <Link href="/admin/simulations">
-                                    <Button variant="outline" className="w-full justify-start gap-2 text-xs">
+                                    </Link>
+                                </Button>
+                                <Button variant="outline" className="w-full justify-start gap-2 text-xs" asChild>
+                                    <Link href="/admin/simulations">
                                         <TrendingUp className="w-4 h-4 text-amber-600" />
                                         <span>Simulador de costos y márgenes</span>
-                                    </Button>
-                                </Link>
-                                <Link href="/admin/calendar">
-                                    <Button variant="outline" className="w-full justify-start gap-2 text-xs">
+                                    </Link>
+                                </Button>
+                                <Button variant="outline" className="w-full justify-start gap-2 text-xs" asChild>
+                                    <Link href="/admin/calendar">
                                         <Calendar className="w-4 h-4 text-indigo-600" />
                                         <span>Agenda y entregas del taller</span>
-                                    </Button>
-                                </Link>
+                                    </Link>
+                                </Button>
                             </CardContent>
                         </Card>
                     </div>
