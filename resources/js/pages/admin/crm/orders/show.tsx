@@ -31,7 +31,9 @@ import {
     History,
     Check,
     MessageSquare,
-    ExternalLink
+    ExternalLink,
+    Pencil,
+    Trash2
 } from 'lucide-react';
 import type { CrmOrder, CrmSupplier } from '@/types/crm';
 
@@ -187,6 +189,54 @@ export default function CrmOrdersShow({ order, financial_summary, suppliers, use
             client_feedback: feedback,
             approved_by_name: name,
         });
+    };
+
+    // Edit Approval Modal State
+    const [editApprovalModalOpen, setEditApprovalModalOpen] = useState(false);
+    const [selectedApproval, setSelectedApproval] = useState<any | null>(null);
+
+    const editApprovalForm = useForm({
+        version_title: '',
+        review_type: 'design_proposal',
+        deadline_at: '',
+        external_url: '',
+        status: 'sent',
+        client_feedback: '',
+        approved_by_name: '',
+        evidence_notes: '',
+    });
+
+    const handleOpenEditApproval = (appr: any) => {
+        setSelectedApproval(appr);
+        editApprovalForm.setData({
+            version_title: appr.version_title || '',
+            review_type: appr.review_type || 'design_proposal',
+            deadline_at: appr.deadline_at ? appr.deadline_at.slice(0, 10) : '',
+            external_url: appr.external_url || '',
+            status: appr.status || 'sent',
+            client_feedback: appr.client_feedback || '',
+            approved_by_name: appr.approved_by_name || '',
+            evidence_notes: appr.evidence_notes || '',
+        });
+        setEditApprovalModalOpen(true);
+    };
+
+    const submitEditApproval = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedApproval) return;
+        editApprovalForm.put(`/admin/crm-approvals/${selectedApproval.id}`, {
+            onSuccess: () => {
+                setEditApprovalModalOpen(false);
+                setSelectedApproval(null);
+                editApprovalForm.reset();
+            },
+        });
+    };
+
+    const handleDeleteApproval = (approvalId: number) => {
+        if (confirm('¿Estás seguro de que deseas eliminar este registro de revisión?')) {
+            router.delete(`/admin/crm-approvals/${approvalId}`);
+        }
     };
 
     // Purchase Form
@@ -669,22 +719,47 @@ export default function CrmOrdersShow({ order, financial_summary, suppliers, use
                             ) : (
                                 order.approvals.map((appr) => (
                                     <div key={appr.id} className="p-4 bg-muted/20 border border-border/60 rounded-xl space-y-3">
-                                        <div className="flex items-center justify-between">
+                                        <div className="flex items-center justify-between gap-2 flex-wrap">
                                             <div className="flex items-center gap-2">
                                                 <h4 className="font-bold text-sm text-foreground">{appr.version_title}</h4>
                                                 <span className="text-xs px-2 py-0.5 rounded-full bg-muted border capitalize">
                                                     {appr.review_type.replace(/_/g, ' ')}
                                                 </span>
                                             </div>
-                                            <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold border ${
-                                                appr.status === 'approved'
-                                                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                                                    : appr.status === 'changes_requested'
-                                                    ? 'bg-amber-50 text-amber-800 border-amber-200'
-                                                    : 'bg-blue-50 text-blue-800 border-blue-200'
-                                            }`}>
-                                                {appr.status === 'approved' ? 'Aprobada ✓' : (appr.status === 'changes_requested' ? 'Con observaciones' : 'Enviada a revisión')}
-                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold border ${
+                                                    appr.status === 'approved'
+                                                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                        : appr.status === 'changes_requested'
+                                                        ? 'bg-amber-50 text-amber-800 border-amber-200'
+                                                        : appr.status === 'rejected'
+                                                        ? 'bg-rose-50 text-rose-800 border-rose-200'
+                                                        : appr.status === 'draft'
+                                                        ? 'bg-stone-50 text-stone-800 border-stone-200'
+                                                        : 'bg-blue-50 text-blue-800 border-blue-200'
+                                                }`}>
+                                                    {appr.status === 'approved' ? 'Aprobada ✓' : (appr.status === 'changes_requested' ? 'Con observaciones' : (appr.status === 'rejected' ? 'Rechazada ✗' : (appr.status === 'draft' ? 'Borrador' : 'Enviada a revisión')))}
+                                                </span>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="h-7 px-2.5 text-xs gap-1 hover:bg-muted"
+                                                    onClick={() => handleOpenEditApproval(appr)}
+                                                    title="Editar revisión"
+                                                >
+                                                    <Pencil className="w-3.5 h-3.5" />
+                                                    <span>Editar</span>
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive"
+                                                    onClick={() => handleDeleteApproval(appr.id)}
+                                                    title="Eliminar revisión"
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </Button>
+                                            </div>
                                         </div>
 
                                         {appr.external_url && (
@@ -1271,6 +1346,131 @@ export default function CrmOrdersShow({ order, financial_summary, suppliers, use
                             <DialogFooter className="pt-2">
                                 <Button type="button" variant="outline" size="sm" onClick={() => setApprovalModalOpen(false)}>Cancelar</Button>
                                 <Button type="submit" size="sm" disabled={approvalForm.processing}>Registrar Envío</Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+
+                {/* MODAL: Editar Revisión */}
+                <Dialog open={editApprovalModalOpen} onOpenChange={setEditApprovalModalOpen}>
+                    <DialogContent className="max-w-lg">
+                        <DialogHeader>
+                            <DialogTitle className="font-serif text-lg">Editar Registro de Revisión y Aprobación</DialogTitle>
+                            <DialogDescription>Modifica los datos de la propuesta, enlace, estado o feedback del cliente.</DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={submitEditApproval} className="space-y-3.5 pt-2">
+                            <div className="space-y-1">
+                                <Label htmlFor="edit_appr_title" className="text-xs">Nombre de la Versión <span className="text-red-500">*</span></Label>
+                                <Input
+                                    id="edit_appr_title"
+                                    value={editApprovalForm.data.version_title}
+                                    onChange={(e) => editApprovalForm.setData('version_title', e.target.value)}
+                                    className="text-xs"
+                                    required
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                    <Label className="text-xs">Tipo de Revisión</Label>
+                                    <Select
+                                        value={editApprovalForm.data.review_type}
+                                        onValueChange={(val) => editApprovalForm.setData('review_type', val)}
+                                    >
+                                        <SelectTrigger className="w-full text-xs">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="design_proposal">Propuesta de Diseño</SelectItem>
+                                            <SelectItem value="print_proof">Prueba de Impresión</SelectItem>
+                                            <SelectItem value="copy_review">Revisión de Textos</SelectItem>
+                                            <SelectItem value="final_deliverable">Entregable Final</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <Label className="text-xs">Estado de la Revisión</Label>
+                                    <Select
+                                        value={editApprovalForm.data.status}
+                                        onValueChange={(val) => editApprovalForm.setData('status', val as any)}
+                                    >
+                                        <SelectTrigger className="w-full text-xs">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="draft">Borrador</SelectItem>
+                                            <SelectItem value="sent">Enviada a revisión</SelectItem>
+                                            <SelectItem value="changes_requested">Con observaciones</SelectItem>
+                                            <SelectItem value="approved">Aprobada ✓</SelectItem>
+                                            <SelectItem value="rejected">Rechazada</SelectItem>
+                                            <SelectItem value="superseded">Sustituida / Obsoleta</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                    <Label htmlFor="edit_appr_deadline" className="text-xs">Fecha Límite Respuesta</Label>
+                                    <Input
+                                        id="edit_appr_deadline"
+                                        type="date"
+                                        value={editApprovalForm.data.deadline_at}
+                                        onChange={(e) => editApprovalForm.setData('deadline_at', e.target.value)}
+                                        className="text-xs"
+                                    />
+                                </div>
+
+                                <div className="space-y-1">
+                                    <Label htmlFor="edit_appr_approved_by" className="text-xs">Aprobado por (Nombre)</Label>
+                                    <Input
+                                        id="edit_appr_approved_by"
+                                        placeholder="Nombre de la persona"
+                                        value={editApprovalForm.data.approved_by_name}
+                                        onChange={(e) => editApprovalForm.setData('approved_by_name', e.target.value)}
+                                        className="text-xs"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-1">
+                                <Label htmlFor="edit_appr_url" className="text-xs">Enlace a Archivo / Maqueta Externa</Label>
+                                <Input
+                                    id="edit_appr_url"
+                                    placeholder="https://drive.google.com/... o enlace de Canva/Figma"
+                                    value={editApprovalForm.data.external_url}
+                                    onChange={(e) => editApprovalForm.setData('external_url', e.target.value)}
+                                    className="text-xs"
+                                />
+                            </div>
+
+                            <div className="space-y-1">
+                                <Label htmlFor="edit_appr_feedback" className="text-xs">Comentarios / Observaciones del Cliente</Label>
+                                <Textarea
+                                    id="edit_appr_feedback"
+                                    rows={3}
+                                    placeholder="Escribe los comentarios o cambios solicitados por el cliente..."
+                                    value={editApprovalForm.data.client_feedback}
+                                    onChange={(e) => editApprovalForm.setData('client_feedback', e.target.value)}
+                                    className="text-xs resize-none"
+                                />
+                            </div>
+
+                            <div className="space-y-1">
+                                <Label htmlFor="edit_appr_notes" className="text-xs">Notas Internas / Evidencia</Label>
+                                <Input
+                                    id="edit_appr_notes"
+                                    placeholder="Ej. Aprobado por WhatsApp el 12/Oct"
+                                    value={editApprovalForm.data.evidence_notes}
+                                    onChange={(e) => editApprovalForm.setData('evidence_notes', e.target.value)}
+                                    className="text-xs"
+                                />
+                            </div>
+
+                            <DialogFooter className="pt-2">
+                                <Button type="button" variant="outline" size="sm" onClick={() => setEditApprovalModalOpen(false)}>Cancelar</Button>
+                                <Button type="submit" size="sm" disabled={editApprovalForm.processing}>Guardar Cambios</Button>
                             </DialogFooter>
                         </form>
                     </DialogContent>

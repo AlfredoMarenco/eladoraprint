@@ -32,7 +32,7 @@ class CrmSupplierController extends Controller
 
         $suppliers = $query->withCount('purchases')
             ->with(['purchases' => fn ($q) => $q->with('payments')])
-            ->orderBy('name')
+            ->latest('id')
             ->paginate(15)
             ->withQueryString();
 
@@ -83,8 +83,16 @@ class CrmSupplierController extends Controller
 
     public function destroy(CrmSupplier $crmSupplier): RedirectResponse
     {
-        $crmSupplier->delete();
+        if ($crmSupplier->purchases()->exists() || $crmSupplier->payments()->exists()) {
+            return redirect()->back()->with('error', 'No se puede eliminar el proveedor porque tiene compras o pagos registrados asociados.');
+        }
 
-        return redirect()->back()->with('success', 'Proveedor archivado');
+        try {
+            $crmSupplier->delete();
+
+            return redirect()->back()->with('success', 'Proveedor eliminado.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            return redirect()->back()->with('error', 'No se puede eliminar el proveedor porque tiene información vinculada.');
+        }
     }
 }

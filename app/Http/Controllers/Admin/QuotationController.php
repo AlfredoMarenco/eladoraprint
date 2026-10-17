@@ -8,8 +8,10 @@ use App\Models\Client;
 use App\Models\CrmActivityLog;
 use App\Models\Quotation;
 use App\Services\CrmWorkflowService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -43,7 +45,7 @@ class QuotationController extends Controller
             });
         }
 
-        $quotations = $query->latest('creation_date')->paginate(15)->withQueryString();
+        $quotations = $query->latest('creation_date')->latest('id')->paginate(15)->withQueryString();
 
         return Inertia::render('admin/crm/quotations/index', [
             'quotations' => $quotations,
@@ -130,12 +132,7 @@ class QuotationController extends Controller
 
         return Inertia::render('admin/crm/quotations/show', [
             'quotation' => $quotation,
-            'company_info' => [
-                'name' => BusinessSetting::get('company_name', 'Eladora'),
-                'email' => BusinessSetting::get('company_email', 'contacto@eladora.mx'),
-                'phone' => BusinessSetting::get('company_phone', '+52 55 4912 3847'),
-                'currency' => BusinessSetting::get('default_currency', 'MXN'),
-            ],
+            'company_info' => $this->getCompanyInfo(),
         ]);
     }
 
@@ -277,12 +274,71 @@ class QuotationController extends Controller
 
     public function destroy(Quotation $quotation): RedirectResponse
     {
-        if ($quotation->converted_to_order_id) {
-            return redirect()->back()->with('error', 'No se puede eliminar una cotización que ya fue convertida a pedido.');
+        if ($quotation->converted_to_order_id || \App\Models\CrmOrder::where('quotation_id', $quotation->id)->exists()) {
+            return redirect()->back()->with('error', 'No se puede eliminar una cotización que ya fue convertida a pedido o tiene un pedido asociado.');
         }
 
-        $quotation->delete();
+        try {
+            $quotation->delete();
 
-        return redirect()->route('admin.quotations.index')->with('success', 'Cotización eliminada');
+            return redirect()->route('admin.quotations.index')->with('success', 'Cotización eliminada');
+        } catch (\Illuminate\Database\QueryException $e) {
+            return redirect()->back()->with('error', 'No se puede eliminar la cotización porque tiene información relacionada.');
+        }
+    }
+
+    public function downloadPdf(Quotation $quotation): HttpResponse
+    {
+        $quotation->load(['client', 'opportunity', 'convertedOrder']);
+
+        $logoBase64 = null;
+        if (file_exists(public_path('images/logo.png'))) {
+            $logoBase64 = 'data:image/png;base64,'.base64_encode((string) file_get_contents(public_path('images/logo.png')));
+        }
+
+        $pdf = Pdf::loadView('pdf.quotation', [
+            'quotation' => $quotation,
+            'company_info' => $this->getCompanyInfo(),
+            'logo' => $logoBase64,
+        ])->setPaper('letter', 'portrait');
+
+        return $pdf->download("Cotizacion-{$quotation->folio}.pdf");
+    }
+
+    public function previewPdf(Quotation $quotation): HttpResponse
+    {
+        $quotation->load(['client', 'opportunity', 'convertedOrder']);
+
+        $logoBase64 = null;
+        if (file_exists(public_path('images/logo.png'))) {
+            $logoBase64 = 'data:image/png;base64,'.base64_encode((string) file_get_contents(public_path('images/logo.png')));
+        }
+
+        $pdf = Pdf::loadView('pdf.quotation', [
+            'quotation' => $quotation,
+            'company_info' => $this->getCompanyInfo(),
+            'logo' => $logoBase64,
+        ])->setPaper('letter', 'portrait');
+
+        return $pdf->stream("Cotizacion-{$quotation->folio}.pdf");
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function getCompanyInfo(): array
+    {
+        return [
+            'name' => BusinessSetting::get('company_name', 'Eladora'),
+            'email' => BusinessSetting::get('company_email', 'contacto@eladora.mx'),
+            'phone' => BusinessSetting::get('company_phone', '+52 55 4912 3847'),
+            'currency' => BusinessSetting::get('default_currency', 'MXN'),
+            'website' => BusinessSetting::get('company_website', 'www.eladora.mx'),
+            'address' => BusinessSetting::get('company_address', 'Ciudad de México, México'),
+            'bank_name' => BusinessSetting::get('bank_name', 'BBVA México'),
+            'bank_account' => BusinessSetting::get('bank_account', '0123 4567 89'),
+            'bank_clabe' => BusinessSetting::get('bank_clabe', '012 180 00123456789 0'),
+            'bank_beneficiary' => BusinessSetting::get('bank_beneficiary', 'Eladora Impresión & Diseño'),
+        ];
     }
 }

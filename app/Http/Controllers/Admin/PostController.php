@@ -85,8 +85,12 @@ class PostController extends Controller
 
     public function destroy(Post $post)
     {
-        $post->delete();
+        try {
+            $post->delete();
 
-        return redirect()->route('admin.posts.index')->with('success', 'Artículo eliminado.');
+            return redirect()->route('admin.posts.index')->with('success', 'Artículo eliminado.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            return redirect()->route('admin.posts.index')->with('error', 'El artículo no se puede eliminar porque tiene elementos asociados.');
+        }
     }
 }

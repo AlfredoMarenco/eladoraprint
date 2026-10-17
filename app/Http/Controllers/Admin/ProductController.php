@@ -14,7 +14,7 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::with('images')->latest()->paginate(10);
+        $products = Product::with('images')->latest('id')->paginate(10);
 
         return Inertia::render('admin/products/index', [
             'products' => $products,
@@ -99,6 +99,10 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         try {
+            if (\App\Models\OrderItem::where('product_id', $product->id)->exists()) {
+                return redirect()->route('admin.products.index')->with('error', 'El producto no se puede eliminar porque tiene órdenes o compras asociadas.');
+            }
+
             $product->delete();
 
             return redirect()->route('admin.products.index')->with('success', 'Producto eliminado.');

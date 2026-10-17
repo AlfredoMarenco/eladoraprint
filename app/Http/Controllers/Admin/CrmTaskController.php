@@ -89,8 +89,16 @@ class CrmTaskController extends Controller
 
     public function destroy(CrmTask $crmTask): RedirectResponse
     {
-        $crmTask->delete();
+        if (CrmTask::where('depends_on_task_id', $crmTask->id)->exists()) {
+            return redirect()->back()->with('error', 'No se puede eliminar la tarea porque otras tareas dependen de ella.');
+        }
 
-        return redirect()->back()->with('success', 'Tarea eliminada');
+        try {
+            $crmTask->delete();
+
+            return redirect()->back()->with('success', 'Tarea eliminada');
+        } catch (\Illuminate\Database\QueryException $e) {
+            return redirect()->back()->with('error', 'No se puede eliminar la tarea porque tiene registros vinculados.');
+        }
     }
 }

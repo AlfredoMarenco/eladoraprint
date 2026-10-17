@@ -57,7 +57,7 @@ class CrmOrderController extends Controller
             });
         }
 
-        $orders = $query->latest('requested_at')->paginate(15)->withQueryString();
+        $orders = $query->latest('requested_at')->latest('id')->paginate(15)->withQueryString();
 
         return Inertia::render('admin/crm/orders/index', [
             'orders' => $orders,
@@ -264,9 +264,17 @@ class CrmOrderController extends Controller
 
     public function destroy(CrmOrder $crmOrder): RedirectResponse
     {
-        $crmOrder->delete();
-        CrmActivityLog::log($crmOrder, 'deleted', "Pedido {$crmOrder->folio} eliminado/archivado");
+        if ($crmOrder->payments()->exists() || $crmOrder->purchases()->exists()) {
+            return redirect()->back()->with('error', 'No se puede eliminar el pedido porque tiene pagos registrados o compras a proveedores asociadas.');
+        }
 
-        return redirect()->route('admin.crm-orders.index')->with('success', 'Pedido archivado');
+        try {
+            $crmOrder->delete();
+            CrmActivityLog::log($crmOrder, 'deleted', "Pedido {$crmOrder->folio} eliminado");
+
+            return redirect()->route('admin.crm-orders.index')->with('success', 'Pedido eliminado');
+        } catch (\Illuminate\Database\QueryException $e) {
+            return redirect()->back()->with('error', 'No se puede eliminar el pedido porque tiene información vinculada.');
+        }
     }
 }

@@ -41,7 +41,7 @@ class OpportunityController extends Controller
             $query->where('priority', $priority);
         }
 
-        $opportunities = $query->latest('entry_date')->get();
+        $opportunities = $query->latest('entry_date')->latest('id')->get();
         $clients = Client::where('status', 'active')->orderBy('name')->get(['id', 'name', 'business_name', 'phone']);
         $users = User::all(['id', 'name']);
 
@@ -105,14 +105,17 @@ class OpportunityController extends Controller
     public function update(Request $request, Opportunity $opportunity): RedirectResponse
     {
         $validated = $request->validate([
+            'client_id' => 'sometimes|required|exists:clients,id',
             'title' => 'sometimes|required|string|max:255',
             'universe' => 'sometimes|required|in:print,studio,moments',
             'description' => 'nullable|string',
             'stage' => 'sometimes|required|string',
             'priority' => 'sometimes|required|in:low,medium,high,urgent',
             'estimated_amount' => 'nullable|numeric|min:0',
+            'entry_date' => 'sometimes|required|date',
             'next_followup_date' => 'nullable|date',
             'assigned_to' => 'nullable|exists:users,id',
+            'contact_channel' => 'nullable|string',
             'notes' => 'nullable|string',
             'lost_reason' => 'nullable|string',
         ]);
@@ -168,8 +171,16 @@ class OpportunityController extends Controller
 
     public function destroy(Opportunity $opportunity): RedirectResponse
     {
-        $opportunity->delete();
+        if ($opportunity->quotations()->exists()) {
+            return redirect()->back()->with('error', 'No se puede eliminar la oportunidad porque tiene cotizaciones asociadas.');
+        }
 
-        return redirect()->back()->with('success', 'Oportunidad eliminada');
+        try {
+            $opportunity->delete();
+
+            return redirect()->back()->with('success', 'Oportunidad eliminada');
+        } catch (\Illuminate\Database\QueryException $e) {
+            return redirect()->back()->with('error', 'No se puede eliminar la oportunidad porque tiene registros asociados.');
+        }
     }
 }

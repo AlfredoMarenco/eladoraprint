@@ -73,8 +73,12 @@ class TestimonialController extends Controller
 
     public function destroy(Testimonial $testimonial)
     {
-        $testimonial->delete();
+        try {
+            $testimonial->delete();
 
-        return redirect()->route('admin.testimonials.index')->with('success', 'Testimonio eliminado.');
+            return redirect()->route('admin.testimonials.index')->with('success', 'Testimonio eliminado.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            return redirect()->route('admin.testimonials.index')->with('error', 'El testimonio no se puede eliminar porque tiene elementos asociados.');
+        }
     }
 }

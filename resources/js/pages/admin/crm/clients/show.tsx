@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { 
     ArrowLeft, 
-    Edit, 
+    Edit, Trash2, 
     Phone, 
     Mail, 
     MessageCircle, 
@@ -86,6 +86,20 @@ export default function ClientsShow({ client, total_paid = 0, total_balance_due 
                                 <Edit className="w-4 h-4" />
                                 <span>Editar Ficha</span>
                             </Link>
+                        </Button>
+
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => {
+                                if (confirm(`¿Estás seguro de eliminar al cliente "${client.name}"? Solo se permitirá si no tiene cotizaciones, pedidos o pagos asociados.`)) {
+                                    router.delete(`/admin/clients/${client.id}`);
+                                }
+                            }}
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            <span>Eliminar Cliente</span>
                         </Button>
                         <Button size="sm" className="gap-1.5" asChild>
                             <Link href={`/admin/quotations/create?client_id=${client.id}`}>

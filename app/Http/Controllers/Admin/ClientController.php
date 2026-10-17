@@ -39,7 +39,7 @@ class ClientController extends Controller
 
         $clients = $query->withCount(['orders', 'quotations'])
             ->with(['payments' => fn ($q) => $q->where('is_reversal', false)])
-            ->latest()
+            ->latest('id')
             ->paginate(15)
             ->withQueryString();
 
@@ -131,9 +131,17 @@ class ClientController extends Controller
 
     public function destroy(Client $client): RedirectResponse
     {
-        $client->delete();
+        if ($client->orders()->exists() || $client->quotations()->exists() || $client->opportunities()->exists() || $client->payments()->exists()) {
+            return redirect()->back()->with('error', 'No se puede eliminar el cliente porque tiene cotizaciones, pedidos, pagos u oportunidades asociadas.');
+        }
 
-        return redirect()->route('admin.clients.index')
-            ->with('success', 'Cliente archivado correctamente');
+        try {
+            $client->delete();
+
+            return redirect()->route('admin.clients.index')
+                ->with('success', 'Cliente eliminado correctamente.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            return redirect()->back()->with('error', 'No se puede eliminar el cliente porque tiene información vinculada.');
+        }
     }
 }

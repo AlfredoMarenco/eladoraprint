@@ -12,7 +12,7 @@ class ServiceController extends Controller
 {
     public function index()
     {
-        $services = Service::orderBy('order')->paginate(10);
+        $services = Service::latest('id')->paginate(10);
 
         return Inertia::render('admin/services/index', [
             'services' => $services,
@@ -73,8 +73,16 @@ class ServiceController extends Controller
 
     public function destroy(Service $service)
     {
-        $service->delete();
+        try {
+            if (\App\Models\CrmOrder::where('service_type', $service->title)->exists()) {
+                return redirect()->route('admin.services.index')->with('error', 'El servicio no se puede eliminar porque está vinculado a pedidos existentes.');
+            }
 
-        return redirect()->route('admin.services.index')->with('success', 'Servicio eliminado.');
+            $service->delete();
+
+            return redirect()->route('admin.services.index')->with('success', 'Servicio eliminado.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            return redirect()->route('admin.services.index')->with('error', 'El servicio no se puede eliminar porque tiene información asociada.');
+        }
     }
 }

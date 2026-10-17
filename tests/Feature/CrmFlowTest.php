@@ -514,3 +514,50 @@ test('quotation simulator saves scenarios and allows converting to formal quotat
         ->and($quotation->universe)->toBe('moments')
         ->and($quotation->status)->toBe('draft');
 });
+
+test('formal quotation can be downloaded and previewed as a letterhead pdf', function () {
+    $user = User::factory()->create();
+    $user->assignRole('Administradora');
+    $this->actingAs($user);
+
+    $client = Client::create([
+        'name' => 'Carlos Slim',
+        'business_name' => 'Grupo Carso',
+        'email' => 'carlos@carso.com',
+        'phone' => '5511223344',
+        'client_type' => 'empresa',
+    ]);
+
+    $quotation = Quotation::create([
+        'folio' => 'COT-PRN-0099',
+        'client_id' => $client->id,
+        'universe' => 'print',
+        'project_name' => 'Menús en Hot Stamping',
+        'description' => 'Impresión en papel algodón 350g con foil dorado mate',
+        'items' => [
+            [
+                'concept' => 'Menú Tríptico',
+                'description' => 'Papel algodón 350g, hot stamping oro mate',
+                'quantity' => 150,
+                'unit_price' => 45.00,
+                'subtotal' => 6750.00,
+            ],
+        ],
+        'subtotal' => 6750.00,
+        'discount' => 250.00,
+        'total_amount' => 6500.00,
+        'advance_required' => 3250.00,
+        'creation_date' => now()->toDateString(),
+        'expiration_date' => now()->addDays(15)->toDateString(),
+        'status' => 'sent',
+        'version' => 1,
+    ]);
+
+    $response = $this->get("/admin/quotations/{$quotation->id}/pdf");
+    $response->assertOk();
+    $response->assertHeader('content-type', 'application/pdf');
+
+    $previewResponse = $this->get("/admin/quotations/{$quotation->id}/preview-pdf");
+    $previewResponse->assertOk();
+    $previewResponse->assertHeader('content-type', 'application/pdf');
+});

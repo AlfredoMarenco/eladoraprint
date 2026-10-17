@@ -44,7 +44,7 @@ class CrmPurchaseController extends Controller
             });
         }
 
-        $purchases = $query->latest('requested_date')->paginate(15)->withQueryString();
+        $purchases = $query->latest('requested_date')->latest('id')->paginate(15)->withQueryString();
         $suppliers = CrmSupplier::where('status', 'active')->orderBy('name')->get(['id', 'name']);
         $orders = CrmOrder::whereNotIn('operating_status', ['entregado', 'cerrado'])->get(['id', 'folio', 'project_name']);
 
@@ -97,10 +97,13 @@ class CrmPurchaseController extends Controller
     public function update(Request $request, CrmPurchase $crmPurchase): RedirectResponse
     {
         $validated = $request->validate([
+            'supplier_id' => 'sometimes|required|exists:crm_suppliers,id',
+            'order_id' => 'nullable|exists:crm_orders,id',
             'concept' => 'required|string|max:255',
             'category' => 'required|string',
             'estimated_amount' => 'required|numeric|min:0',
             'real_amount' => 'nullable|numeric|min:0',
+            'requested_date' => 'sometimes|required|date',
             'expected_delivery_date' => 'nullable|date',
             'real_delivery_date' => 'nullable|date',
             'payment_due_date' => 'nullable|date',
@@ -146,8 +149,16 @@ class CrmPurchaseController extends Controller
 
     public function destroy(CrmPurchase $crmPurchase): RedirectResponse
     {
-        $crmPurchase->delete();
+        if ($crmPurchase->payments()->exists()) {
+            return redirect()->back()->with('error', 'No se puede eliminar la compra porque tiene pagos registrados a proveedores.');
+        }
 
-        return redirect()->back()->with('success', 'Compra eliminada');
+        try {
+            $crmPurchase->delete();
+
+            return redirect()->back()->with('success', 'Compra eliminada');
+        } catch (\Illuminate\Database\QueryException $e) {
+            return redirect()->back()->with('error', 'No se puede eliminar la compra porque tiene registros vinculados.');
+        }
     }
 }

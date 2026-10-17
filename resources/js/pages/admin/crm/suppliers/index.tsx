@@ -16,7 +16,7 @@ import {
     ShoppingBag, 
     DollarSign, 
     Clock, 
-    Edit, 
+    Edit, Trash2, 
     Archive,
     CheckCircle2
 } from 'lucide-react';
@@ -189,14 +189,30 @@ export default function SuppliersIndex({ suppliers, filters }: Props) {
                                             {s.category.replace(/_/g, ' ')}
                                         </Badge>
                                     </div>
-                                    <Button
-                                        size="icon"
-                                        variant="ghost"
-                                        className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                                        onClick={() => openEditModal(s)}
-                                    >
-                                        <Edit className="w-3.5 h-3.5" />
-                                    </Button>
+                                    <div className="flex items-center gap-1">
+                                        <Button
+                                            size="icon"
+                                            variant="ghost"
+                                            className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                                            onClick={() => openEditModal(s)}
+                                            title="Editar proveedor"
+                                        >
+                                            <Edit className="w-3.5 h-3.5" />
+                                        </Button>
+                                        <Button
+                                            size="icon"
+                                            variant="ghost"
+                                            className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                            onClick={() => {
+                                                if (confirm(`¿Estás seguro de eliminar el proveedor "${s.name}"? Solo se permitirá si no tiene compras ni pagos vinculados.`)) {
+                                                    router.delete(`/admin/suppliers/${s.id}`);
+                                                }
+                                            }}
+                                            title="Eliminar proveedor"
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                        </Button>
+                                    </div>
                                 </CardHeader>
                                 <CardContent className="p-4 pt-1 space-y-3">
                                     <div className="text-xs space-y-1 text-muted-foreground border-b border-border/40 pb-2.5">

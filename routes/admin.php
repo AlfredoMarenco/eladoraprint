@@ -51,6 +51,10 @@ Route::post('quotations/{quotation}/convert-to-order', [QuotationController::cla
     ->name('quotations.convert-to-order');
 Route::post('quotations/{quotation}/duplicate', [QuotationController::class, 'duplicate'])
     ->name('quotations.duplicate');
+Route::get('quotations/{quotation}/pdf', [QuotationController::class, 'downloadPdf'])
+    ->name('quotations.pdf');
+Route::get('quotations/{quotation}/preview-pdf', [QuotationController::class, 'previewPdf'])
+    ->name('quotations.preview-pdf');
 
 // CRM Central Orders (Print, Studio, Moments)
 Route::resource('crm-orders', CrmOrderController::class);
