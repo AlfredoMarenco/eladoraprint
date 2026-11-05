@@ -139,9 +139,11 @@ export interface CrmOrderApproval {
 export interface CrmSupplier {
     id: number;
     name: string;
+    supplier_type?: 'traditional' | 'online';
     contact_name?: string | null;
     phone?: string | null;
     email?: string | null;
+    website_url?: string | null;
     category: string;
     notes?: string | null;
     status: 'active' | 'archived';

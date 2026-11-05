@@ -15,9 +15,11 @@ class CrmSupplier extends Model
 
     protected $fillable = [
         'name',
+        'supplier_type',
         'contact_name',
         'phone',
         'email',
+        'website_url',
         'category',
         'notes',
         'status',

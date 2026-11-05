@@ -22,7 +22,7 @@ interface CalendarEvent {
     id: string;
     title: string;
     date: string;
-    type: 'delivery' | 'task' | 'purchase' | 'followup';
+    type: 'delivery' | 'confirmed_order' | 'task' | 'purchase' | 'followup';
     universe: Universe;
     status: string;
     priority?: string;
@@ -66,6 +66,7 @@ export default function CrmCalendarIndex({ events, filters }: Props) {
 
     const typeBadges = {
         delivery: { label: 'Entrega', classes: 'bg-emerald-500 text-white' },
+        confirmed_order: { label: 'Pedido Confirmado', classes: 'bg-indigo-600 text-white' },
         task: { label: 'Tarea Taller', classes: 'bg-indigo-500 text-white' },
         purchase: { label: 'Compra Insumo', classes: 'bg-amber-500 text-white' },
         followup: { label: 'Seguimiento', classes: 'bg-purple-500 text-white' },
@@ -73,7 +74,7 @@ export default function CrmCalendarIndex({ events, filters }: Props) {
 
     return (
         <>
-            <Head title="Calendario de Taller y Entregas - Eladora CRM" />
+            <Head title="Calendario de Entregas y Pedidos - Eladora CRM" />
 
             <div className="flex flex-col gap-6 p-6 w-full">
                 {/* Header */}
@@ -81,12 +82,12 @@ export default function CrmCalendarIndex({ events, filters }: Props) {
                     <div>
                         <div className="flex items-center gap-2">
                             <h1 className="text-2xl sm:text-3xl font-serif font-bold text-foreground tracking-tight">
-                                Calendario de Operaciones
+                                Calendario de Entregas y Pedidos
                             </h1>
                             <UniverseBadge universe={filters.universe} size="sm" />
                         </div>
                         <p className="text-sm text-muted-foreground mt-0.5">
-                            Fechas de entrega comprometidas, tareas operativas, recepciones de compras y seguimientos.
+                            Fechas de entrega comprometidas y fechas de pedidos confirmados.
                         </p>
                     </div>
 
@@ -132,18 +133,14 @@ export default function CrmCalendarIndex({ events, filters }: Props) {
                     </div>
 
                     {/* Legend */}
-                    <div className="hidden sm:flex items-center gap-3 text-xs">
+                    <div className="hidden sm:flex items-center gap-4 text-xs">
                         <span className="flex items-center gap-1.5 text-muted-foreground">
                             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                            <span>Entregas Cliente</span>
+                            <span>Fechas de Entrega</span>
                         </span>
                         <span className="flex items-center gap-1.5 text-muted-foreground">
-                            <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-                            <span>Tareas Taller</span>
-                        </span>
-                        <span className="flex items-center gap-1.5 text-muted-foreground">
-                            <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                            <span>Insumos</span>
+                            <span className="w-2.5 h-2.5 rounded-full bg-indigo-600" />
+                            <span>Pedidos Confirmados</span>
                         </span>
                     </div>
                 </div>

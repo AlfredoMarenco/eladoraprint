@@ -31,15 +31,24 @@ class CrmFinancialService
      */
     public function calculateBalanceDue(CrmOrder $order): float
     {
+        if ($order->commercial_status === 'cancelado') {
+            return 0.0;
+        }
+
         $approved = (float) $order->approved_amount;
         $collected = $this->calculateTotalCollected($order);
 
-        // Adjustments that reduce balance (like discounts)
-        $discountAdjustments = (float) $order->adjustments()
-            ->where('type', 'discount')
+        // Adjustments that reduce balance (discounts, refunds, cancellation balance)
+        $reducingAdjustments = (float) $order->adjustments()
+            ->whereIn('type', ['discount', 'refund_adjustment', 'cancellation_balance'])
             ->sum('amount');
 
-        $balance = $approved - $collected - $discountAdjustments;
+        // Adjustments that increase balance (price_adjustment)
+        $increasingAdjustments = (float) $order->adjustments()
+            ->where('type', 'price_adjustment')
+            ->sum('amount');
+
+        $balance = $approved + $increasingAdjustments - $collected - $reducingAdjustments;
 
         return round(max(0, $balance), 2);
     }
@@ -49,24 +58,19 @@ class CrmFinancialService
      */
     public function calculatePendingAdvance(CrmOrder $order): float
     {
+        if ($order->commercial_status === 'cancelado') {
+            return 0.0;
+        }
+
         $advanceRequired = (float) $order->advance_required;
         if ($advanceRequired <= 0) {
             return 0.0;
         }
 
-        $advanceCollected = (float) $order->payments()
-            ->where('is_reversal', false)
-            ->where('concept', 'anticipo')
-            ->sum('amount');
+        // Consider total net collected towards covering the advance requirement
+        $netCollected = $this->calculateTotalCollected($order);
 
-        $advanceReversals = (float) $order->payments()
-            ->where('is_reversal', true)
-            ->where('concept', 'anticipo')
-            ->sum('amount');
-
-        $netAdvanceCollected = max(0, $advanceCollected - $advanceReversals);
-
-        return round(max(0, $advanceRequired - $netAdvanceCollected), 2);
+        return round(max(0, $advanceRequired - $netCollected), 2);
     }
 
     /**
@@ -200,7 +204,8 @@ class CrmFinancialService
      */
     public function getGlobalFinancialSummary(?string $universe = null, ?string $startDate = null, ?string $endDate = null): array
     {
-        $ordersQuery = CrmOrder::query();
+        $ordersQuery = CrmOrder::query()
+            ->where('commercial_status', '!=', 'cancelado');
 
         if ($universe && $universe !== 'all') {
             $ordersQuery->where('universe', $universe);
@@ -223,9 +228,11 @@ class CrmFinancialService
         $totalEstimatedCosts = 0.0;
         $totalRealCosts = 0.0;
         $totalEstimatedProfit = 0.0;
+        $totalRealProfit = 0.0;
 
         foreach ($orders as $order) {
-            $totalApproved += (float) $order->approved_amount;
+            $approved = (float) $order->approved_amount;
+            $totalApproved += $approved;
             $collected = $this->calculateTotalCollected($order);
             $totalCollected += $collected;
             $totalBalanceDue += $this->calculateBalanceDue($order);
@@ -234,12 +241,17 @@ class CrmFinancialService
             $realCost = $this->calculateRealCosts($order);
             $totalEstimatedCosts += $estCost;
             $totalRealCosts += $realCost;
-            $totalEstimatedProfit += ($order->approved_amount - $estCost);
+            $totalEstimatedProfit += ($approved - $estCost);
+            $totalRealProfit += ($approved - $realCost);
         }
 
         // Purchases pending payment to suppliers
         $purchasesQuery = CrmPurchase::query()
-            ->where('purchase_status', '!=', 'cancelled');
+            ->where('purchase_status', '!=', 'cancelled')
+            ->where(function ($q) {
+                $q->whereNull('order_id')
+                    ->orWhereHas('order', fn ($oq) => $oq->where('commercial_status', '!=', 'cancelado'));
+            });
 
         if ($universe && $universe !== 'all') {
             $purchasesQuery->whereHas('order', fn ($q) => $q->where('universe', $universe));
@@ -256,17 +268,29 @@ class CrmFinancialService
             $totalSupplierDebt += max(0, $cost - $paid);
         }
 
+        $estimatedMarginPercent = $totalApproved > 0 ? round(($totalEstimatedProfit / $totalApproved) * 100, 2) : 0.0;
+        $realMarginPercent = $totalApproved > 0 ? round(($totalRealProfit / $totalApproved) * 100, 2) : 0.0;
+
         return [
             'total_approved' => round($totalApproved, 2),
             'total_collected' => round($totalCollected, 2),
             'total_balance_due' => round($totalBalanceDue, 2),
+            'balance_due' => round($totalBalanceDue, 2),
             'total_pending_advance' => round($totalPendingAdvance, 2),
+            'pending_advance' => round($totalPendingAdvance, 2),
             'total_purchases_committed' => round($totalPurchasesCommitted, 2),
             'total_supplier_debt' => round($totalSupplierDebt, 2),
+            'supplier_debt' => round($totalSupplierDebt, 2),
             'total_estimated_costs' => round($totalEstimatedCosts, 2),
+            'estimated_costs' => round($totalEstimatedCosts, 2),
             'total_real_costs' => round($totalRealCosts, 2),
+            'real_costs' => round($totalRealCosts, 2),
             'total_estimated_profit' => round($totalEstimatedProfit, 2),
-            'estimated_margin_percent' => $totalApproved > 0 ? round(($totalEstimatedProfit / $totalApproved) * 100, 2) : 0,
+            'estimated_profit' => round($totalEstimatedProfit, 2),
+            'total_real_profit' => round($totalRealProfit, 2),
+            'real_profit' => round($totalRealProfit, 2),
+            'estimated_margin_percent' => $estimatedMarginPercent,
+            'real_margin_percent' => $realMarginPercent,
             'orders_count' => $orders->count(),
         ];
     }

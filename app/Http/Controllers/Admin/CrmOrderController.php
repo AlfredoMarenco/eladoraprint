@@ -57,7 +57,7 @@ class CrmOrderController extends Controller
             });
         }
 
-        $orders = $query->latest('requested_at')->latest('id')->paginate(15)->withQueryString();
+        $orders = $query->orderByDesc('created_at')->orderByDesc('id')->paginate(15)->withQueryString();
 
         return Inertia::render('admin/crm/orders/index', [
             'orders' => $orders,
@@ -264,17 +264,35 @@ class CrmOrderController extends Controller
 
     public function destroy(CrmOrder $crmOrder): RedirectResponse
     {
-        if ($crmOrder->payments()->exists() || $crmOrder->purchases()->exists()) {
-            return redirect()->back()->with('error', 'No se puede eliminar el pedido porque tiene pagos registrados o compras a proveedores asociadas.');
-        }
-
         try {
-            $crmOrder->delete();
-            CrmActivityLog::log($crmOrder, 'deleted', "Pedido {$crmOrder->folio} eliminado");
+            \DB::transaction(function () use ($crmOrder) {
+                $folio = $crmOrder->folio;
 
-            return redirect()->route('admin.crm-orders.index')->with('success', 'Pedido eliminado');
-        } catch (\Illuminate\Database\QueryException $e) {
-            return redirect()->back()->with('error', 'No se puede eliminar el pedido porque tiene información vinculada.');
+                // Unlink converted quotation if any
+                \App\Models\Quotation::where('converted_to_order_id', $crmOrder->id)
+                    ->update(['converted_to_order_id' => null]);
+
+                // Delete supplier payments and purchases linked to this order
+                foreach ($crmOrder->purchases()->withTrashed()->get() as $purchase) {
+                    $purchase->payments()->delete();
+                    $purchase->delete();
+                }
+
+                // Delete customer payments, tasks, approvals, cost items, adjustments
+                $crmOrder->payments()->delete();
+                $crmOrder->tasks()->delete();
+                $crmOrder->approvals()->delete();
+                $crmOrder->costItems()->delete();
+                $crmOrder->adjustments()->delete();
+
+                $crmOrder->delete();
+
+                CrmActivityLog::log($crmOrder, 'deleted', "Pedido {$folio} eliminado junto con sus registros asociados");
+            });
+
+            return redirect()->route('admin.crm-orders.index')->with('success', 'Pedido eliminado correctamente');
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', 'No se pudo eliminar el pedido: '.$e->getMessage());
         }
     }
 }

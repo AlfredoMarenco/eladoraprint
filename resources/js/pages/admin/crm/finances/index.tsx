@@ -35,7 +35,9 @@ interface FinancialSummary {
     estimated_costs: number;
     real_costs: number;
     estimated_profit: number;
+    real_profit?: number;
     estimated_margin_percent: number;
+    real_margin_percent?: number;
 }
 
 interface Props {
@@ -205,31 +207,43 @@ export default function FinancesIndex({
                     <Card className="bg-card border-border/60 shadow-xs p-5 md:col-span-2">
                         <div className="flex items-center justify-between pb-3 border-b border-border/40">
                             <div>
-                                <h3 className="font-serif font-bold text-foreground text-base">Utilidad y Rentabilidad Estimada</h3>
+                                <h3 className="font-serif font-bold text-foreground text-base">Utilidad y Rentabilidad Real vs. Estimada</h3>
                                 <p className="text-xs text-muted-foreground">
                                     Ventas Aprobadas menos Costos de Taller, Insumos y Servicios Externos.
                                 </p>
                             </div>
-                            <div className="text-right">
-                                <span className="text-xs text-muted-foreground block">Margen Promedio</span>
-                                <span className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
-                                    {summary.estimated_margin_percent}%
-                                </span>
+                            <div className="flex items-center gap-4 text-right">
+                                <div>
+                                    <span className="text-[11px] text-muted-foreground block">Margen Estimado</span>
+                                    <span className="text-lg font-bold font-mono text-foreground">
+                                        {summary.estimated_margin_percent ?? 0}%
+                                    </span>
+                                </div>
+                                <div>
+                                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 block font-semibold">Margen Real</span>
+                                    <span className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
+                                        {summary.real_margin_percent ?? summary.estimated_margin_percent ?? 0}%
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-4 mt-4 text-center">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 text-center">
                             <div className="bg-muted/30 p-3 rounded-xl">
                                 <span className="text-[11px] text-muted-foreground block">Costos Estimados</span>
-                                <MoneyDisplay amount={summary.estimated_costs} size="md" className="font-semibold text-foreground mt-1" />
+                                <MoneyDisplay amount={summary.estimated_costs ?? 0} size="md" className="font-semibold text-foreground mt-1" />
                             </div>
                             <div className="bg-muted/30 p-3 rounded-xl">
-                                <span className="text-[11px] text-muted-foreground block">Costos Reales Registrados</span>
-                                <MoneyDisplay amount={summary.real_costs} size="md" className="font-semibold text-foreground mt-1" />
+                                <span className="text-[11px] text-muted-foreground block">Costos Reales</span>
+                                <MoneyDisplay amount={summary.real_costs ?? 0} size="md" className="font-semibold text-foreground mt-1" />
+                            </div>
+                            <div className="bg-muted/40 p-3 rounded-xl">
+                                <span className="text-[11px] text-muted-foreground block font-medium">Utilidad Estimada</span>
+                                <MoneyDisplay amount={summary.estimated_profit ?? 0} size="md" className="font-bold text-foreground mt-1" />
                             </div>
                             <div className="bg-emerald-500/10 p-3 rounded-xl">
-                                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 block font-medium">Utilidad Estimada</span>
-                                <MoneyDisplay amount={summary.estimated_profit} size="md" className="font-bold text-emerald-600 dark:text-emerald-400 mt-1" />
+                                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 block font-semibold">Utilidad Real</span>
+                                <MoneyDisplay amount={summary.real_profit ?? summary.estimated_profit ?? 0} size="md" className="font-bold text-emerald-600 dark:text-emerald-400 mt-1" />
                             </div>
                         </div>
 

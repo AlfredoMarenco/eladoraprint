@@ -13,7 +13,8 @@ import {
     PlusCircle, 
     Search, 
     Calendar, 
-    ChevronRight
+    ChevronRight,
+    Trash2
 } from 'lucide-react';
 import type { CrmOrder, Universe } from '@/types/crm';
 
@@ -216,12 +217,30 @@ export default function CrmOrdersIndex({ orders, filters = {}, operating_statuse
                                                 </td>
 
                                                 <td className="py-3 px-4 text-right">
-                                                    <Button variant="ghost" size="sm" className="gap-1 font-semibold h-7 text-xs" asChild>
-                                                        <Link href={`/admin/crm-orders/${order.id}`}>
-                                                            <span>Ficha</span>
-                                                            <ChevronRight className="w-3.5 h-3.5" />
-                                                        </Link>
-                                                    </Button>
+                                                    <div className="flex items-center justify-end gap-1">
+                                                        <Button variant="ghost" size="sm" className="gap-1 font-semibold h-7 text-xs" asChild>
+                                                            <Link href={`/admin/crm-orders/${order.id}`}>
+                                                                <span>Ficha</span>
+                                                                <ChevronRight className="w-3.5 h-3.5" />
+                                                            </Link>
+                                                        </Button>
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            title="Eliminar pedido"
+                                                            className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                                            onClick={() => {
+                                                                if (confirm(`¿Estás seguro de eliminar el pedido ${order.folio} (${order.project_name})? Se descontará de las métricas del Dashboard y Finanzas.`)) {
+                                                                    router.delete(`/admin/crm-orders/${order.id}`, {
+                                                                        preserveScroll: true,
+                                                                    });
+                                                                }
+                                                            }}
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        </Button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))

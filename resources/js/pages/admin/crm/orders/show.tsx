@@ -359,6 +359,22 @@ export default function CrmOrdersShow({ order, financial_summary, suppliers, use
                                 </SelectContent>
                             </Select>
                         </div>
+
+                        {/* Delete order button */}
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-xs gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+                            onClick={() => {
+                                if (confirm(`¿Estás seguro de eliminar el pedido ${order.folio} (${order.project_name})? Se eliminarán sus registros vinculados y dejará de contabilizarse en el Dashboard y Finanzas.`)) {
+                                    router.delete(`/admin/crm-orders/${order.id}`);
+                                }
+                            }}
+                        >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Borrar Pedido</span>
+                        </Button>
                     </div>
                 </div>
 

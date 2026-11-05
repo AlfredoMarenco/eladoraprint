@@ -14,6 +14,7 @@ class CrmSupplierController extends Controller
     public function index(Request $request): Response
     {
         $status = $request->query('status', 'active');
+        $type = $request->query('type', 'all');
         $search = $request->query('search');
 
         $query = CrmSupplier::query();
@@ -22,11 +23,16 @@ class CrmSupplierController extends Controller
             $query->where('status', $status);
         }
 
+        if ($type && $type !== 'all') {
+            $query->where('supplier_type', $type);
+        }
+
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('contact_name', 'like', "%{$search}%")
-                    ->orWhere('category', 'like', "%{$search}%");
+                    ->orWhere('category', 'like', "%{$search}%")
+                    ->orWhere('website_url', 'like', "%{$search}%");
             });
         }
 
@@ -40,6 +46,7 @@ class CrmSupplierController extends Controller
             'suppliers' => $suppliers,
             'filters' => [
                 'status' => $status,
+                'type' => $type,
                 'search' => $search,
             ],
         ]);
@@ -49,15 +56,18 @@ class CrmSupplierController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'supplier_type' => 'nullable|in:traditional,online',
             'contact_name' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:50',
             'email' => 'nullable|email|max:255',
+            'website_url' => 'nullable|string|max:2048',
             'category' => 'required|string',
             'notes' => 'nullable|string',
         ]);
 
         CrmSupplier::create([
             ...$validated,
+            'supplier_type' => $validated['supplier_type'] ?? 'traditional',
             'status' => 'active',
         ]);
 
@@ -68,15 +78,20 @@ class CrmSupplierController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'supplier_type' => 'nullable|in:traditional,online',
             'contact_name' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:50',
             'email' => 'nullable|email|max:255',
+            'website_url' => 'nullable|string|max:2048',
             'category' => 'required|string',
             'status' => 'required|in:active,archived',
             'notes' => 'nullable|string',
         ]);
 
-        $crmSupplier->update($validated);
+        $crmSupplier->update([
+            ...$validated,
+            'supplier_type' => $validated['supplier_type'] ?? $crmSupplier->supplier_type ?? 'traditional',
+        ]);
 
         return redirect()->back()->with('success', 'Proveedor actualizado correctamente');
     }

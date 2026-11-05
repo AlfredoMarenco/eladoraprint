@@ -28,6 +28,25 @@
 
         <link rel="icon" href="/images/logo.png" type="image/png">
         <link rel="apple-touch-icon" href="/images/logo.png">
+        <link rel="manifest" href="/manifest.webmanifest">
+        <meta name="theme-color" content="#1C1917">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="Eladora CRM">
+
+        <script>
+            window.__deferredPwaPrompt = null;
+            window.addEventListener('beforeinstallprompt', function(e) {
+                e.preventDefault();
+                window.__deferredPwaPrompt = e;
+                window.dispatchEvent(new CustomEvent('pwa-install-available'));
+            });
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('/sw.js').catch(function() {});
+                });
+            }
+        </script>
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
