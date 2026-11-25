@@ -110,9 +110,9 @@
         const page = parseInitialInertiaPage();
         if (page) {
             state.currentComponent = page.component || null;
-            if (page.props?.qaBot?.enabled) {
+            if (page.props?.qaBot) {
                 applyQaContext(page.props.qaBot);
-            } else if (page.props?.auth?.user?.role === 'admin') {
+            } else if (page.props?.auth?.user?.role === 'admin' || page.props?.auth?.user?.is_admin === true) {
                 state.isAdmin = true;
             }
         }
@@ -1343,16 +1343,16 @@
                 state.currentComponent = page.component;
             }
             if (page.props && Object.prototype.hasOwnProperty.call(page.props, 'qaBot')) {
-                if (page.props.qaBot && page.props.qaBot.enabled) {
+                if (page.props.qaBot) {
                     applyQaContext(page.props.qaBot);
                 } else {
-                    state.isAdmin = page.props.auth?.user?.role === 'admin';
+                    state.isAdmin = page.props.auth?.user?.role === 'admin' || page.props.auth?.user?.is_admin === true;
                     state.activeAccount = null;
                     state.viaPass = false;
                 }
                 window.__SAPIUS_QA_ADMIN__ = state.isAdmin;
             } else if (page.props && Object.prototype.hasOwnProperty.call(page.props, 'auth')) {
-                state.isAdmin = page.props.auth?.user?.role === 'admin';
+                state.isAdmin = page.props.auth?.user?.role === 'admin' || page.props.auth?.user?.is_admin === true;
                 window.__SAPIUS_QA_ADMIN__ = state.isAdmin;
             }
         }
