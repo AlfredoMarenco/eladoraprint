@@ -229,7 +229,7 @@
     const DEFECT_TYPES = [
         { value: 'broken_action', label: '⚠️ Botón, enlace o formulario no funciona' },
         { value: 'server_error', label: '💥 Error 500 / Pantalla de error' },
-        { value: 'legacy_parity', label: '🔄 Diferencia con Sapius original' },
+        { value: 'legacy_parity', label: '🔄 Error de Paridad o Funcionalidad' },
         { value: 'visual_copy', label: '🎨 Error visual / Diseño o texto erróneo' },
     ];
 
@@ -866,7 +866,7 @@
         return `
             <div class="tab-body">
                 <div class="scope-banner">
-                    🔒 Solo correcciones de errores y paridad con Sapius original (no nuevas funciones ni cambios de BD).
+                    🔒 Reporte directo de errores para corrección y QA en vivo.
                 </div>
                 <div class="context-bar">
                     <span class="chip chip-url" title="${escapeHtml(state.currentUrl)}">${escapeHtml(shortUrl)}</span>
@@ -1074,7 +1074,7 @@
                 <div class="panel" role="dialog" aria-label="Bot de Revisión QA">
                     <div class="panel-header">
                         <div class="panel-title-wrap">
-                            <div class="panel-title">🛠️ Bot QA Sapius</div>
+                            <div class="panel-title">🛠️ Bot QA Eladora</div>
                             <div class="panel-sub">${headerSub}</div>
                         </div>
                         <div class="header-actions">

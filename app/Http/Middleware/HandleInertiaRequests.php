@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Controllers\Admin\QaFeedbackBotController;
 use App\Models\BusinessSetting;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -37,15 +38,18 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
+        $qaContext = QaFeedbackBotController::resolveReviewerFromRequest($request);
 
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'qaBot' => $qaContext,
             'auth' => [
                 'user' => $user ? [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
+                    'role' => $user->hasAnyRole(['Admin', 'Administradora']) ? 'admin' : 'user',
                     'roles' => $user->getRoleNames(),
                     'is_admin' => $user->hasAnyRole(['Admin', 'Administradora']),
                 ] : null,
