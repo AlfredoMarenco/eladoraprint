@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProjectController;
+use App\Http\Controllers\Admin\QaFeedbackBotController;
 use App\Http\Controllers\Admin\QuotationController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SettingController;
@@ -139,3 +140,16 @@ Route::resource('orders', OrderController::class);
 
 Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
 Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
+
+/*
+|--------------------------------------------------------------------------
+| QA Feedback Bot Routes
+|--------------------------------------------------------------------------
+*/
+Route::get('qa-bot/reports', [QaFeedbackBotController::class, 'index'])->name('qa-bot.index');
+Route::post('qa-bot/reports', [QaFeedbackBotController::class, 'store'])->name('qa-bot.store');
+Route::patch('qa-bot/reports/{id}', [QaFeedbackBotController::class, 'update'])->name('qa-bot.update');
+Route::delete('qa-bot/reports/{id}', [QaFeedbackBotController::class, 'destroy'])->name('qa-bot.destroy');
+Route::get('qa-bot/screenshots/{filename}', [QaFeedbackBotController::class, 'screenshot'])->name('qa-bot.screenshot');
+Route::post('qa-bot/revoke-pass', [QaFeedbackBotController::class, 'revokePass'])->name('qa-bot.revoke-pass');
+

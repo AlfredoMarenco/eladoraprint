@@ -60,5 +60,15 @@
     </head>
     <body class="font-sans antialiased">
         <x-inertia::app />
+        @php
+            $qaContext = \App\Http\Controllers\Admin\QaFeedbackBotController::resolveReviewerFromRequest(request());
+        @endphp
+        @if ($qaContext !== null)
+            <script>
+                window.__SAPIUS_QA_ADMIN__ = true;
+                window.__SAPIUS_QA_CONTEXT__ = @json($qaContext);
+            </script>
+        @endif
+        <script src="/js/qa-bot.js?v={{ @filemtime(public_path('js/qa-bot.js')) ?: 1 }}" defer></script>
     </body>
 </html>
