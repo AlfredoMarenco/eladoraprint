@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import { formatCrmDate } from '@/lib/utils';
 import { UniverseSelector } from '@/components/crm/universe-selector';
 import { UniverseBadge } from '@/components/crm/universe-badge';
@@ -231,8 +230,6 @@ export default function QuotationsIndex({ quotations, filters = {} }: Props) {
     );
 }
 
-QuotationsIndex.layout = (page: any) => (
-    <AppLayout breadcrumbs={[{ title: 'Cotizaciones', href: '/admin/quotations' }]}>
-        {page}
-    </AppLayout>
-);
+QuotationsIndex.layout = {
+    breadcrumbs: [{ title: 'Cotizaciones', href: '/admin/quotations' }],
+};

@@ -63,24 +63,28 @@
             border: 1px solid #e2e8f0;
             border-top: 3px solid #9a7b4f;
             border-radius: 6px;
-            padding: 10px 14px;
+            padding: 8px 12px;
             text-align: right;
-            width: 210px;
+            width: 200px;
         }
 
         .quote-title {
-            font-size: 10px;
+            font-size: 8.5px;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 1.2px;
             font-weight: bold;
             color: #64748b;
         }
 
         .quote-folio {
             font-family: 'Courier New', monospace;
-            font-size: 18px;
+            font-size: 11px;
             font-weight: bold;
-            color: #0f172a;
+            color: #64748b;
+            background-color: #e2e8f0;
+            display: inline-block;
+            padding: 1px 6px;
+            border-radius: 3px;
             margin: 2px 0;
         }
 
@@ -136,7 +140,7 @@
             background-color: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 6px;
-            padding: 10px 12px;
+            padding: 12px 14px;
         }
 
         .info-card-title {
@@ -151,15 +155,16 @@
         }
 
         .info-card-name {
-            font-size: 13px;
+            font-size: 16px;
             font-weight: bold;
             color: #0f172a;
+            line-height: 1.25;
         }
 
         .info-card-sub {
             font-size: 9.5px;
             color: #64748b;
-            margin-top: 2px;
+            margin-top: 3px;
         }
 
         /* Items Table */
@@ -494,21 +499,40 @@
             <td style="width: 5%;"></td>
             <td style="width: 40%; vertical-align: top;">
                 <div class="totals-box">
+                    @php
+                        $subtotal = (float) $quotation->subtotal;
+                        $discount = (float) $quotation->discount;
+                        $netSubtotal = max(0, $subtotal - $discount);
+                        $hasTax = !empty($with_tax);
+                        $taxAmount = $hasTax ? round($netSubtotal * 0.16, 2) : 0;
+                        $finalTotal = $hasTax ? ($netSubtotal + $taxAmount) : $netSubtotal;
+                        $advAmount = (float) $quotation->advance_required;
+                        // If tax is included, adjust advance proportionally if desired, or keep direct ratio
+                        $advancePct = $finalTotal > 0 ? round(($advAmount / max(1, (float) $quotation->total_amount)) * 100) : 50;
+                        $effectiveAdvance = round(($advancePct / 100) * $finalTotal, 2);
+                        $remainingBalance = max(0, $finalTotal - $effectiveAdvance);
+                    @endphp
                     <table class="totals-row">
                         <tr>
                             <td style="color: #64748b;">Subtotal:</td>
-                            <td class="text-right" style="font-weight: 600;">${{ number_format((float) $quotation->subtotal, 2) }}</td>
+                            <td class="text-right" style="font-weight: 600;">${{ number_format($subtotal, 2) }}</td>
                         </tr>
-                        @if((float) $quotation->discount > 0)
+                        @if($discount > 0)
                         <tr>
-                            <td style="color: #059669;">Descuento aplicable:</td>
-                            <td class="text-right" style="color: #059669; font-weight: 600;">-${{ number_format((float) $quotation->discount, 2) }}</td>
+                            <td style="color: #059669;">Descuento:</td>
+                            <td class="text-right" style="color: #059669; font-weight: 600;">-${{ number_format($discount, 2) }}</td>
+                        </tr>
+                        @endif
+                        @if($hasTax)
+                        <tr>
+                            <td style="color: #475569;">IVA (16%):</td>
+                            <td class="text-right" style="color: #475569; font-weight: 600;">+${{ number_format($taxAmount, 2) }}</td>
                         </tr>
                         @endif
                         <tr class="total-highlight">
-                            <td>TOTAL:</td>
+                            <td>TOTAL{{ $hasTax ? ' C/IVA' : ' S/IVA' }}:</td>
                             <td class="text-right" style="font-family: 'Georgia', serif; font-size: 15px; color: #0f172a;">
-                                ${{ number_format((float) $quotation->total_amount, 2) }} <span style="font-size: 8px; font-weight: normal; color: #64748b;">{{ $company_info['currency'] }}</span>
+                                ${{ number_format($finalTotal, 2) }} <span style="font-size: 8px; font-weight: normal; color: #64748b;">{{ $company_info['currency'] }}</span>
                             </td>
                         </tr>
                     </table>
@@ -517,15 +541,15 @@
                     <div class="advance-highlight">
                         <table style="width: 100%;">
                             <tr>
-                                <td>Anticipo p/ inicio ({{ round(((float) $quotation->advance_required / max(1, (float) $quotation->total_amount)) * 100) }}%):</td>
+                                <td>Anticipo p/ inicio ({{ $advancePct }}%):</td>
                                 <td class="text-right" style="font-size: 11px; font-weight: bold;">
-                                    ${{ number_format((float) $quotation->advance_required, 2) }}
+                                    ${{ number_format($effectiveAdvance, 2) }}
                                 </td>
                             </tr>
                             <tr>
                                 <td style="font-size: 8.5px; color: #047857; font-weight: normal;">Saldo restante al entregar:</td>
                                 <td class="text-right" style="font-size: 9px; color: #047857;">
-                                    ${{ number_format(max(0, (float) $quotation->total_amount - (float) $quotation->advance_required), 2) }}
+                                    ${{ number_format($remainingBalance, 2) }}
                                 </td>
                             </tr>
                         </table>

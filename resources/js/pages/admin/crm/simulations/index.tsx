@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, router, useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,21 +33,16 @@ export default function SimulationsIndex({ scenarios, clients }: Props) {
     const [selectedClientId, setSelectedClientId] = useState('');
     const [comparingScenarioIds, setComparingScenarioIds] = useState<number[]>([]);
 
-    // Live Simulator State
+    // Live Simulator State - Initial amounts set to 0 for custom configuration
     const [name, setName] = useState('Nuevo Escenario');
     const [universe, setUniverse] = useState<Universe>('print');
     const [serviceType, setServiceType] = useState('Papelería Corporativa');
-    const [quantity, setQuantity] = useState(100);
-    const [salePrice, setSalePrice] = useState(3500);
-    const [workshopOverhead, setWorkshopOverhead] = useState(350);
+    const [quantity, setQuantity] = useState(0);
+    const [salePrice, setSalePrice] = useState(0);
+    const [workshopOverhead, setWorkshopOverhead] = useState(0);
     const [notes, setNotes] = useState('');
 
-    const [costItems, setCostItems] = useState([
-        { category: 'materiales', concept: 'Papel y cartulina especial', amount: 800 },
-        { category: 'impresion_externa', concept: 'Offset / Laminado', amount: 500 },
-        { category: 'acabados', concept: 'Hot Stamping Foil oro', amount: 450 },
-        { category: 'empaque', concept: 'Cajas personalizadas', amount: 200 },
-    ]);
+    const [costItems, setCostItems] = useState<Array<{ category: string; concept: string; amount: number }>>([]);
 
     // Live calculations
     const itemsTotal = costItems.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
@@ -545,8 +539,6 @@ export default function SimulationsIndex({ scenarios, clients }: Props) {
     );
 }
 
-SimulationsIndex.layout = (page: any) => (
-    <AppLayout breadcrumbs={[{ title: 'Simulador de Cotizaciones', href: '/admin/simulations' }]}>
-        {page}
-    </AppLayout>
-);
+SimulationsIndex.layout = {
+    breadcrumbs: [{ title: 'Simulador de Cotizaciones', href: '/admin/simulations' }],
+};

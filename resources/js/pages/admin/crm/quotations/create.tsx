@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -379,13 +378,9 @@ export default function QuotationsCreate({ clients, selected_client_id, default_
     );
 }
 
-QuotationsCreate.layout = (page: any) => (
-    <AppLayout
-        breadcrumbs={[
-            { title: 'Cotizaciones', href: '/admin/quotations' },
-            { title: 'Nueva Cotización', href: '/admin/quotations/create' },
-        ]}
-    >
-        {page}
-    </AppLayout>
-);
+QuotationsCreate.layout = {
+    breadcrumbs: [
+        { title: 'Cotizaciones', href: '/admin/quotations' },
+        { title: 'Nueva Cotización', href: '/admin/quotations/create' },
+    ],
+};

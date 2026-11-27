@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import { formatCrmDate } from '@/lib/utils';
 import { UniverseSelector } from '@/components/crm/universe-selector';
 import { UniverseBadge } from '@/components/crm/universe-badge';
@@ -14,7 +13,8 @@ import {
     Search, 
     Calendar, 
     ChevronRight,
-    Trash2
+    Trash2,
+    ArrowDownUp
 } from 'lucide-react';
 import type { CrmOrder, Universe } from '@/types/crm';
 
@@ -30,6 +30,8 @@ interface Props {
         commercial_status?: string;
         priority?: string;
         search?: string;
+        sort_by?: string;
+        sort_direction?: 'asc' | 'desc';
     };
     operating_statuses?: Record<string, string>;
 }
@@ -45,6 +47,11 @@ export default function CrmOrdersIndex({ orders, filters = {}, operating_statuse
 
     const handleOperatingStatusFilter = (st: string) => {
         router.get('/admin/crm-orders', { ...filters, operating_status: st === 'all' ? '' : st }, { preserveState: true });
+    };
+
+    const toggleSort = (column: string) => {
+        const nextDirection = filters.sort_by === column && filters.sort_direction === 'desc' ? 'asc' : 'desc';
+        router.get('/admin/crm-orders', { ...filters, sort_by: column, sort_direction: nextDirection }, { preserveState: true });
     };
 
     const orderList = orders?.data || [];
@@ -82,7 +89,7 @@ export default function CrmOrdersIndex({ orders, filters = {}, operating_statuse
 
                 {/* Search & Quick Status Filters */}
                 <div className="flex flex-col md:flex-row items-center justify-between gap-3 bg-card p-3 rounded-xl border border-border/60">
-                    <form onSubmit={handleSearch} className="relative w-full md:w-80">
+                    <form onSubmit={handleSearch} className="relative w-full md:w-72">
                         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                         <Input
                             placeholder="Buscar folio, cliente o proyecto..."
@@ -92,32 +99,49 @@ export default function CrmOrdersIndex({ orders, filters = {}, operating_statuse
                         />
                     </form>
 
-                    <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
-                        <button
-                            type="button"
-                            onClick={() => handleOperatingStatusFilter('all')}
-                            className={`px-2.5 py-1 rounded-md text-xs whitespace-nowrap transition-colors border ${
-                                !filters.operating_status
-                                    ? 'bg-foreground text-background font-semibold border-foreground'
-                                    : 'bg-muted/40 text-muted-foreground hover:text-foreground border-border'
-                            }`}
-                        >
-                            Todos
-                        </button>
-                        {['en_produccion', 'listo_produccion', 'listo_para_entregar', 'bloqueado', 'entregado'].map((stKey) => (
+                    <div className="flex items-center gap-2 flex-wrap w-full md:w-auto justify-between md:justify-end">
+                        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
                             <button
-                                key={stKey}
                                 type="button"
-                                onClick={() => handleOperatingStatusFilter(stKey)}
+                                onClick={() => handleOperatingStatusFilter('all')}
                                 className={`px-2.5 py-1 rounded-md text-xs whitespace-nowrap transition-colors border ${
-                                    filters.operating_status === stKey
+                                    !filters.operating_status
                                         ? 'bg-foreground text-background font-semibold border-foreground'
                                         : 'bg-muted/40 text-muted-foreground hover:text-foreground border-border'
                                 }`}
                             >
-                                {operating_statuses[stKey] || stKey.replace(/_/g, ' ')}
+                                Todos
                             </button>
-                        ))}
+                            {['en_produccion', 'listo_produccion', 'listo_para_entregar', 'bloqueado', 'entregado'].map((stKey) => (
+                                <button
+                                    key={stKey}
+                                    type="button"
+                                    onClick={() => handleOperatingStatusFilter(stKey)}
+                                    className={`px-2.5 py-1 rounded-md text-xs whitespace-nowrap transition-colors border ${
+                                        filters.operating_status === stKey
+                                            ? 'bg-foreground text-background font-semibold border-foreground'
+                                            : 'bg-muted/40 text-muted-foreground hover:text-foreground border-border'
+                                    }`}
+                                >
+                                    {operating_statuses[stKey] || stKey.replace(/_/g, ' ')}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Sort by registration date button */}
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toggleSort('created_at')}
+                            className="h-8 text-xs gap-1.5 shrink-0"
+                            title="Alternar orden por fecha de registro"
+                        >
+                            <ArrowDownUp className="w-3.5 h-3.5 text-muted-foreground" />
+                            <span>
+                                {filters.sort_direction === 'asc' ? 'Más antiguos primero' : 'Más recientes primero'}
+                            </span>
+                        </Button>
                     </div>
                 </div>
 
@@ -132,6 +156,16 @@ export default function CrmOrdersIndex({ orders, filters = {}, operating_statuse
                             <table className="w-full text-left text-sm border-t border-border/50">
                                 <thead className="bg-muted/40 text-xs font-semibold text-muted-foreground uppercase">
                                     <tr>
+                                        <th 
+                                            className="py-2.5 px-4 cursor-pointer select-none hover:text-foreground transition-colors"
+                                            onClick={() => toggleSort('created_at')}
+                                            title="Clic para ordenar por fecha de registro"
+                                        >
+                                            <div className="flex items-center gap-1">
+                                                <span>Registro</span>
+                                                <ArrowDownUp className="w-3 h-3 opacity-60" />
+                                            </div>
+                                        </th>
                                         <th className="py-2.5 px-4">Folio</th>
                                         <th className="py-2.5 px-4">Universo / Proyecto</th>
                                         <th className="py-2.5 px-4">Cliente</th>
@@ -146,13 +180,16 @@ export default function CrmOrdersIndex({ orders, filters = {}, operating_statuse
                                 <tbody className="divide-y divide-border/40">
                                     {orderList.length === 0 ? (
                                         <tr>
-                                            <td colSpan={9} className="py-10 text-center text-muted-foreground">
+                                            <td colSpan={10} className="py-10 text-center text-muted-foreground">
                                                 No se encontraron pedidos con los filtros aplicados.
                                             </td>
                                         </tr>
                                     ) : (
                                         orderList.map((order) => (
                                             <tr key={order.id} className="hover:bg-muted/20 transition-colors">
+                                                <td className="py-3 px-4 text-xs text-muted-foreground whitespace-nowrap">
+                                                    {formatCrmDate(order.created_at)}
+                                                </td>
                                                 <td className="py-3 px-4 font-mono font-bold text-xs">
                                                     {order.folio}
                                                 </td>
@@ -275,8 +312,6 @@ export default function CrmOrdersIndex({ orders, filters = {}, operating_statuse
     );
 }
 
-CrmOrdersIndex.layout = (page: any) => (
-    <AppLayout breadcrumbs={[{ title: 'Pedidos', href: '/admin/crm-orders' }]}>
-        {page}
-    </AppLayout>
-);
+CrmOrdersIndex.layout = {
+    breadcrumbs: [{ title: 'Pedidos', href: '/admin/crm-orders' }],
+};

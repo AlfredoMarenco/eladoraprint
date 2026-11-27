@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -355,17 +354,9 @@ export default function QuotationsEdit({ quotation, clients }: Props) {
     );
 }
 
-QuotationsEdit.layout = (page: any) => {
-    const quotation = page?.props?.quotation ?? page?.quotation;
-    return (
-        <AppLayout
-            breadcrumbs={[
-                { title: 'Cotizaciones', href: '/admin/quotations' },
-                { title: quotation?.folio || 'Cotización', href: quotation?.id ? `/admin/quotations/${quotation.id}` : '/admin/quotations' },
-                { title: 'Editar', href: quotation?.id ? `/admin/quotations/${quotation.id}/edit` : '/admin/quotations' },
-            ]}
-        >
-            {page}
-        </AppLayout>
-    );
+QuotationsEdit.layout = {
+    breadcrumbs: [
+        { title: 'Cotizaciones', href: '/admin/quotations' },
+        { title: 'Editar Cotización', href: '/admin/quotations' },
+    ],
 };

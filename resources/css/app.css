@@ -9,7 +9,7 @@
 
 @theme {
     --font-sans:
-        'Outfit', ui-sans-serif, system-ui, sans-serif,
+        'Plus Jakarta Sans', 'Google Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
     --font-serif:
@@ -64,38 +64,38 @@
 }
 
 :root {
-    --background: #F9F6EE;
-    --foreground: #3E362E;
+    --background: #FFFFFF;
+    --foreground: #2D2721;
     --card: #FFFFFF;
-    --card-foreground: #3E362E;
+    --card-foreground: #2D2721;
     --popover: #FFFFFF;
-    --popover-foreground: #3E362E;
+    --popover-foreground: #2D2721;
     --primary: #D4AF37;
     --primary-foreground: #FFFFFF;
-    --secondary: #EFEBE0;
-    --secondary-foreground: #3E362E;
-    --muted: #EFEBE0;
-    --muted-foreground: #8B857A;
-    --accent: #D4AF37;
-    --accent-foreground: #FFFFFF;
+    --secondary: #FDFBF7;
+    --secondary-foreground: #2D2721;
+    --muted: #F8F5EE;
+    --muted-foreground: #7E766C;
+    --accent: #FDF6E2;
+    --accent-foreground: #8C6D1F;
     --destructive: #EF4444;
     --destructive-foreground: #FFFFFF;
-    --border: #E5E0D5;
-    --input: #E5E0D5;
+    --border: #EDE8DE;
+    --input: #EDE8DE;
     --ring: #D4AF37;
     --chart-1: #D4AF37;
     --chart-2: #8B857A;
     --chart-3: #3E362E;
-    --chart-4: #EFEBE0;
-    --chart-5: #F9F6EE;
+    --chart-4: #FEF9E7;
+    --chart-5: #FFFFFF;
     --radius: 0.5rem;
-    --sidebar: #F9F6EE;
-    --sidebar-foreground: #3E362E;
+    --sidebar: #FAFAF8;
+    --sidebar-foreground: #2D2721;
     --sidebar-primary: #D4AF37;
     --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent: #EFEBE0;
-    --sidebar-accent-foreground: #3E362E;
-    --sidebar-border: #E5E0D5;
+    --sidebar-accent: #FEF9E7;
+    --sidebar-accent-foreground: #8C6D1F;
+    --sidebar-border: #EDE8DE;
     --sidebar-ring: #D4AF37;
 }
 

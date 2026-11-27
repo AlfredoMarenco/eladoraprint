@@ -169,6 +169,18 @@ class OpportunityController extends Controller
             ->with('success', "Cotización {$quotation->folio} creada. Puedes detallar conceptos y precios.");
     }
 
+    public function convertToOrder(Opportunity $opportunity): RedirectResponse
+    {
+        try {
+            $order = $this->workflowService->convertOpportunityToOrder($opportunity, auth()->id());
+
+            return redirect()->route('admin.crm-orders.show', $order->id)
+                ->with('success', "¡Oportunidad {$opportunity->folio} convertida exitosamente en el pedido {$order->folio}!");
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al convertir a pedido: '.$e->getMessage());
+        }
+    }
+
     public function destroy(Opportunity $opportunity): RedirectResponse
     {
         if ($opportunity->quotations()->exists()) {

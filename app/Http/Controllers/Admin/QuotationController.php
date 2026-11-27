@@ -287,9 +287,11 @@ class QuotationController extends Controller
         }
     }
 
-    public function downloadPdf(Quotation $quotation): HttpResponse
+    public function downloadPdf(Request $request, Quotation $quotation): HttpResponse
     {
         $quotation->load(['client', 'opportunity', 'convertedOrder']);
+
+        $withTax = $request->boolean('with_tax', false);
 
         $logoBase64 = null;
         if (file_exists(public_path('images/logo.png'))) {
@@ -300,14 +302,17 @@ class QuotationController extends Controller
             'quotation' => $quotation,
             'company_info' => $this->getCompanyInfo(),
             'logo' => $logoBase64,
+            'with_tax' => $withTax,
         ])->setPaper('letter', 'portrait');
 
         return $pdf->download("Cotizacion-{$quotation->folio}.pdf");
     }
 
-    public function previewPdf(Quotation $quotation): HttpResponse
+    public function previewPdf(Request $request, Quotation $quotation): HttpResponse
     {
         $quotation->load(['client', 'opportunity', 'convertedOrder']);
+
+        $withTax = $request->boolean('with_tax', false);
 
         $logoBase64 = null;
         if (file_exists(public_path('images/logo.png'))) {
@@ -318,6 +323,7 @@ class QuotationController extends Controller
             'quotation' => $quotation,
             'company_info' => $this->getCompanyInfo(),
             'logo' => $logoBase64,
+            'with_tax' => $withTax,
         ])->setPaper('letter', 'portrait');
 
         return $pdf->stream("Cotizacion-{$quotation->folio}.pdf");

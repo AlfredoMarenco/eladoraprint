@@ -43,6 +43,8 @@ Route::resource('clients', ClientController::class);
 Route::resource('opportunities', OpportunityController::class);
 Route::post('opportunities/{opportunity}/convert-to-quotation', [OpportunityController::class, 'convertToQuotation'])
     ->name('opportunities.convert-to-quotation');
+Route::post('opportunities/{opportunity}/convert-to-order', [OpportunityController::class, 'convertToOrder'])
+    ->name('opportunities.convert-to-order');
 
 // Quotations
 Route::resource('quotations', QuotationController::class);

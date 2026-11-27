@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import { UniverseSelector } from '@/components/crm/universe-selector';
 import { UniverseBadge } from '@/components/crm/universe-badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -64,9 +63,11 @@ export default function CrmCalendarIndex({ events, filters }: Props) {
         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
     ];
 
-    const typeBadges = {
-        delivery: { label: 'Entrega', classes: 'bg-emerald-500 text-white' },
-        confirmed_order: { label: 'Pedido Confirmado', classes: 'bg-indigo-600 text-white' },
+    const typeBadges: Record<string, { label: string; classes: string }> = {
+        delivery: { label: 'Entrega', classes: 'bg-emerald-600 text-white' },
+        deadline: { label: 'Fecha Límite', classes: 'bg-rose-600 text-white' },
+        production_start: { label: 'Inicio Producción', classes: 'bg-amber-600 text-white' },
+        confirmed_order: { label: 'Pedido', classes: 'bg-blue-600 text-white' },
         task: { label: 'Tarea Taller', classes: 'bg-indigo-500 text-white' },
         purchase: { label: 'Compra Insumo', classes: 'bg-amber-500 text-white' },
         followup: { label: 'Seguimiento', classes: 'bg-purple-500 text-white' },
@@ -271,8 +272,6 @@ export default function CrmCalendarIndex({ events, filters }: Props) {
     );
 }
 
-CrmCalendarIndex.layout = (page: any) => (
-    <AppLayout breadcrumbs={[{ title: 'Calendario y Agenda', href: '/admin/calendar' }]}>
-        {page}
-    </AppLayout>
-);
+CrmCalendarIndex.layout = {
+    breadcrumbs: [{ title: 'Calendario y Agenda', href: '/admin/calendar' }],
+};

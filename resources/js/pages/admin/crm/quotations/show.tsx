@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import { UniverseBadge } from '@/components/crm/universe-badge';
 import { MoneyDisplay } from '@/components/crm/money-display';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -41,6 +40,19 @@ interface Props {
 }
 
 export default function QuotationsShow({ quotation, company_info }: Props) {
+    const [withTax, setWithTax] = useState(false);
+
+    const subtotal = Number(quotation.subtotal) || 0;
+    const discount = Number(quotation.discount) || 0;
+    const netSubtotal = Math.max(0, subtotal - discount);
+    const taxAmount = withTax ? Number((netSubtotal * 0.16).toFixed(2)) : 0;
+    const calculatedTotal = withTax ? Number((netSubtotal + taxAmount).toFixed(2)) : netSubtotal;
+    const initialTotal = Number(quotation.total_amount) || netSubtotal;
+    const initialAdvance = Number(quotation.advance_required) || 0;
+    const advancePct = initialTotal > 0 ? Math.round((initialAdvance / initialTotal) * 100) : 50;
+    const calculatedAdvance = Number(((advancePct / 100) * calculatedTotal).toFixed(2));
+    const remainingBalance = Math.max(0, calculatedTotal - calculatedAdvance);
+
     const handleStatusChange = (status: string) => {
         router.post(`/admin/quotations/${quotation.id}/status`, { status });
     };
@@ -117,6 +129,19 @@ export default function QuotationsShow({ quotation, company_info }: Props) {
                     </div>
 
                     <div className="flex items-center gap-2 flex-wrap">
+                        {/* IVA 16% toggle */}
+                        <div className="flex items-center gap-2 bg-amber-50/70 border border-amber-200/80 px-3 py-1 rounded-lg text-xs font-medium text-amber-950">
+                            <label className="flex items-center gap-2 cursor-pointer select-none">
+                                <input
+                                    type="checkbox"
+                                    checked={withTax}
+                                    onChange={(e) => setWithTax(e.target.checked)}
+                                    className="rounded border-amber-300 text-amber-700 focus:ring-amber-500 h-4 w-4"
+                                />
+                                <span>Incluir IVA (+16%)</span>
+                            </label>
+                        </div>
+
                         {/* Status selector */}
                         <Select
                             value={quotation.status}
@@ -137,14 +162,14 @@ export default function QuotationsShow({ quotation, company_info }: Props) {
                             </SelectContent>
                         </Select>
 
-                        <a href={`/admin/quotations/${quotation.id}/pdf`} download={`Cotizacion-${quotation.folio}.pdf`}>
+                        <a href={`/admin/quotations/${quotation.id}/pdf?with_tax=${withTax ? 1 : 0}`} download={`Cotizacion-${quotation.folio}.pdf`}>
                             <Button size="sm" className="gap-1.5 bg-stone-900 hover:bg-stone-800 text-white dark:bg-stone-100 dark:text-stone-900">
                                 <Download className="w-4 h-4" />
                                 <span>Descargar PDF</span>
                             </Button>
                         </a>
 
-                        <a href={`/admin/quotations/${quotation.id}/preview-pdf`} target="_blank" rel="noopener noreferrer">
+                        <a href={`/admin/quotations/${quotation.id}/preview-pdf?with_tax=${withTax ? 1 : 0}`} target="_blank" rel="noopener noreferrer">
                             <Button variant="outline" size="sm" className="gap-1.5">
                                 <ExternalLink className="w-4 h-4" />
                                 <span>Ver PDF</span>
@@ -225,20 +250,20 @@ export default function QuotationsShow({ quotation, company_info }: Props) {
                         </div>
 
                         <div className="text-left sm:text-right w-full sm:w-auto">
-                            <div className="bg-stone-50 border border-stone-200 border-t-4 border-t-[#9A7B4F] rounded-lg p-3 sm:min-w-[220px]">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
+                            <div className="bg-stone-50 border border-stone-200 border-t-2 border-t-[#9A7B4F] rounded-lg p-3 sm:min-w-[200px]">
+                                <span className="text-[9px] font-bold uppercase tracking-wider text-stone-500 block">
                                     Cotización Formal
                                 </span>
-                                <div className="font-mono text-2xl font-bold text-stone-950 mt-0.5">
+                                <div className="font-mono text-xs font-semibold text-stone-600 bg-stone-200/70 inline-block px-2 py-0.5 rounded mt-0.5">
                                     {quotation.folio}
                                 </div>
                                 <div className="mt-1.5">
                                     <UniverseBadge universe={quotation.universe} size="sm" />
                                 </div>
-                                <div className="text-xs text-stone-600 mt-2.5 space-y-1">
-                                    <div>Fecha expedición: <strong className="text-stone-900">{quotation.creation_date}</strong></div>
+                                <div className="text-[11px] text-stone-600 mt-2 space-y-0.5">
+                                    <div>Fecha: <strong className="text-stone-900">{quotation.creation_date}</strong></div>
                                     {quotation.expiration_date && (
-                                        <div>Válida hasta: <strong className="text-stone-900">{quotation.expiration_date}</strong></div>
+                                        <div>Válida: <strong className="text-stone-900">{quotation.expiration_date}</strong></div>
                                     )}
                                     <div>Versión: <strong className="text-stone-900">v{quotation.version}</strong></div>
                                 </div>
@@ -250,34 +275,34 @@ export default function QuotationsShow({ quotation, company_info }: Props) {
                     <div className="h-0.5 bg-gradient-to-r from-[#C5A880]/30 via-[#9A7B4F] to-[#C5A880]/30 -mt-2" />
 
                     {/* Client & Project Overview Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-xl bg-stone-50/80 border border-stone-200">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 rounded-xl bg-stone-50/90 border border-stone-200">
                         <div>
                             <span className="text-[10px] font-bold uppercase tracking-widest text-[#9A7B4F] block mb-1">
                                 Preparado Para (Cliente):
                             </span>
-                            <div className="text-base font-bold text-stone-950">
+                            <div className="text-xl sm:text-2xl font-serif font-bold text-stone-950 tracking-tight">
                                 {quotation.client?.name}
                             </div>
                             {quotation.client?.business_name && (
-                                <div className="text-xs font-semibold text-stone-700 flex items-center gap-1.5 mt-0.5">
-                                    <Building2 className="w-3.5 h-3.5 text-stone-500" />
+                                <div className="text-sm font-semibold text-stone-700 flex items-center gap-1.5 mt-0.5">
+                                    <Building2 className="w-4 h-4 text-stone-500" />
                                     <span>{quotation.client.business_name}</span>
                                 </div>
                             )}
-                            <div className="text-xs text-stone-500 mt-1">
+                            <div className="text-xs text-stone-500 mt-1.5">
                                 {quotation.client?.email} {quotation.client?.email && quotation.client?.whatsapp && '•'} {quotation.client?.whatsapp || quotation.client?.phone}
                             </div>
                         </div>
 
                         <div>
                             <span className="text-[10px] font-bold uppercase tracking-widest text-[#9A7B4F] block mb-1">
-                                Especificaciones del Proyecto:
+                                Especificaciones del Proyecto / Pedido:
                             </span>
-                            <div className="text-base font-bold text-stone-950">
+                            <div className="text-xl sm:text-2xl font-serif font-bold text-stone-950 tracking-tight">
                                 {quotation.project_name}
                             </div>
                             {quotation.description && (
-                                <p className="text-xs text-stone-600 mt-1 leading-relaxed">
+                                <p className="text-xs text-stone-600 mt-1.5 leading-relaxed">
                                     {quotation.description}
                                 </p>
                             )}
@@ -383,34 +408,41 @@ export default function QuotationsShow({ quotation, company_info }: Props) {
                             <div className="bg-stone-50 p-5 rounded-xl border border-stone-200 space-y-2.5 text-sm">
                                 <div className="flex justify-between text-stone-600">
                                     <span>Subtotal:</span>
-                                    <span className="font-semibold text-stone-900"><MoneyDisplay amount={quotation.subtotal} /></span>
+                                    <span className="font-semibold text-stone-900"><MoneyDisplay amount={subtotal} /></span>
                                 </div>
 
-                                {Number(quotation.discount) > 0 && (
+                                {discount > 0 && (
                                     <div className="flex justify-between text-emerald-700">
                                         <span>Descuento aplicado:</span>
-                                        <span className="font-semibold">-<MoneyDisplay amount={quotation.discount} /></span>
+                                        <span className="font-semibold">-<MoneyDisplay amount={discount} /></span>
+                                    </div>
+                                )}
+
+                                {withTax && (
+                                    <div className="flex justify-between text-stone-700">
+                                        <span>IVA (16%):</span>
+                                        <span className="font-semibold">+<MoneyDisplay amount={taxAmount} /></span>
                                     </div>
                                 )}
 
                                 <div className="flex justify-between items-baseline text-base font-bold pt-2.5 border-t border-stone-300 text-stone-950">
-                                    <span>TOTAL:</span>
+                                    <span>TOTAL{withTax ? ' C/IVA' : ' S/IVA'}:</span>
                                     <span className="text-stone-950 font-serif text-2xl font-bold">
-                                        <MoneyDisplay amount={quotation.total_amount} />
+                                        <MoneyDisplay amount={calculatedTotal} />
                                     </span>
                                 </div>
 
                                 {/* Advance Box */}
                                 <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg mt-2">
                                     <div className="flex justify-between items-center text-xs text-emerald-950 font-bold">
-                                        <span>Anticipo para iniciar (50%):</span>
+                                        <span>Anticipo para iniciar ({advancePct}%):</span>
                                         <span className="text-sm font-extrabold text-emerald-800">
-                                            <MoneyDisplay amount={quotation.advance_required} />
+                                            <MoneyDisplay amount={calculatedAdvance} />
                                         </span>
                                     </div>
                                     <div className="flex justify-between items-center text-[11px] text-emerald-800 mt-1">
                                         <span>Saldo restante al entregar:</span>
-                                        <span><MoneyDisplay amount={Math.max(0, Number(quotation.total_amount) - Number(quotation.advance_required))} /></span>
+                                        <span><MoneyDisplay amount={remainingBalance} /></span>
                                     </div>
                                 </div>
                             </div>
@@ -481,16 +513,9 @@ export default function QuotationsShow({ quotation, company_info }: Props) {
     );
 }
 
-QuotationsShow.layout = (page: any) => {
-    const quotation = page?.props?.quotation ?? page?.quotation;
-    return (
-        <AppLayout
-            breadcrumbs={[
-                { title: 'Cotizaciones', href: '/admin/quotations' },
-                { title: quotation?.folio || 'Cotización', href: quotation?.id ? `/admin/quotations/${quotation.id}` : '/admin/quotations' },
-            ]}
-        >
-            {page}
-        </AppLayout>
-    );
+QuotationsShow.layout = {
+    breadcrumbs: [
+        { title: 'Cotizaciones', href: '/admin/quotations' },
+        { title: 'Detalle de Cotización', href: '/admin/quotations' },
+    ],
 };

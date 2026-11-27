@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import { UniverseSelector } from '@/components/crm/universe-selector';
 import { UniverseBadge } from '@/components/crm/universe-badge';
 import { StatusBadge } from '@/components/crm/status-badge';
@@ -23,7 +22,8 @@ import {
     FileText, 
     MoreHorizontal,
     Phone,
-    Flame
+    Flame,
+    PackageCheck
 } from 'lucide-react';
 import type { Opportunity, Client, Universe } from '@/types/crm';
 
@@ -82,6 +82,12 @@ export default function OpportunitiesIndex({
 
     const handleConvertToQuotation = (oppId: number) => {
         router.post(`/admin/opportunities/${oppId}/convert-to-quotation`);
+    };
+
+    const handleConvertToOrder = (oppId: number) => {
+        if (confirm('¿Deseas convertir esta oportunidad directamente en un pedido formal?')) {
+            router.post(`/admin/opportunities/${oppId}/convert-to-order`);
+        }
     };
 
     return (
@@ -207,17 +213,30 @@ export default function OpportunitiesIndex({
                                                         )}
 
                                                         {/* Action shortcuts */}
-                                                        <div className="flex items-center justify-between pt-1 gap-1">
+                                                        <div className="flex items-center justify-between pt-1 gap-1 flex-wrap">
                                                             {stageKey !== 'confirmado' && (
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="ghost"
-                                                                    className="text-[10px] h-6 px-1.5 gap-1 text-primary hover:text-primary font-semibold"
-                                                                    onClick={() => handleConvertToQuotation(item.id)}
-                                                                >
-                                                                    <FileText className="w-3 h-3" />
-                                                                    <span>Cotizar</span>
-                                                                </Button>
+                                                                <div className="flex items-center gap-0.5">
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="ghost"
+                                                                        className="text-[10px] h-6 px-1.5 gap-1 text-primary hover:text-primary font-semibold"
+                                                                        onClick={() => handleConvertToQuotation(item.id)}
+                                                                        title="Crear Cotización"
+                                                                    >
+                                                                        <FileText className="w-3 h-3" />
+                                                                        <span>Cotizar</span>
+                                                                    </Button>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="ghost"
+                                                                        className="text-[10px] h-6 px-1.5 gap-1 text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 font-semibold"
+                                                                        onClick={() => handleConvertToOrder(item.id)}
+                                                                        title="Convertir directamente a Pedido"
+                                                                    >
+                                                                        <PackageCheck className="w-3 h-3" />
+                                                                        <span>A Pedido</span>
+                                                                    </Button>
+                                                                </div>
                                                             )}
 
                                                             <Select
@@ -306,15 +325,28 @@ export default function OpportunitiesIndex({
                                                         <MoneyDisplay amount={opp.estimated_amount || 0} />
                                                     </td>
                                                     <td className="py-3 px-4 text-right">
-                                                        <Button
-                                                            size="sm"
-                                                            variant="outline"
-                                                            onClick={() => handleConvertToQuotation(opp.id)}
-                                                            className="text-xs h-7 gap-1"
-                                                        >
-                                                            <FileText className="w-3.5 h-3.5" />
-                                                            <span>Cotizar</span>
-                                                        </Button>
+                                                        <div className="flex items-center justify-end gap-1.5">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                onClick={() => handleConvertToQuotation(opp.id)}
+                                                                className="text-xs h-7 gap-1"
+                                                            >
+                                                                <FileText className="w-3.5 h-3.5" />
+                                                                <span>Cotizar</span>
+                                                            </Button>
+                                                            {opp.stage !== 'confirmado' && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    onClick={() => handleConvertToOrder(opp.id)}
+                                                                    className="text-xs h-7 gap-1 border-emerald-300 text-emerald-800 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                                                                >
+                                                                    <PackageCheck className="w-3.5 h-3.5 text-emerald-600" />
+                                                                    <span>A Pedido</span>
+                                                                </Button>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             ))
@@ -459,8 +491,6 @@ export default function OpportunitiesIndex({
     );
 }
 
-OpportunitiesIndex.layout = (page: any) => (
-    <AppLayout breadcrumbs={[{ title: 'Oportunidades Comerciales', href: '/admin/opportunities' }]}>
-        {page}
-    </AppLayout>
-);
+OpportunitiesIndex.layout = {
+    breadcrumbs: [{ title: 'Oportunidades Comerciales', href: '/admin/opportunities' }],
+};

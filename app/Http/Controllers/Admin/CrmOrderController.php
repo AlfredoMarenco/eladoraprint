@@ -30,6 +30,8 @@ class CrmOrderController extends Controller
         $commercialStatus = $request->query('commercial_status');
         $priority = $request->query('priority');
         $search = $request->query('search');
+        $sortDirection = $request->query('sort_direction', 'desc'); // 'desc' (más reciente) o 'asc' (más antiguo)
+        $sortBy = $request->query('sort_by', 'created_at'); // 'created_at' o 'requested_at'
 
         $query = CrmOrder::with(['client', 'assignedUser', 'quotation']);
 
@@ -57,7 +59,11 @@ class CrmOrderController extends Controller
             });
         }
 
-        $orders = $query->orderByDesc('created_at')->orderByDesc('id')->paginate(15)->withQueryString();
+        $validSortColumns = ['created_at', 'requested_at', 'delivery_agreed_at', 'id'];
+        $columnToSort = in_array($sortBy, $validSortColumns, true) ? $sortBy : 'created_at';
+        $direction = strtolower($sortDirection) === 'asc' ? 'asc' : 'desc';
+
+        $orders = $query->orderBy($columnToSort, $direction)->orderBy('id', $direction)->paginate(15)->withQueryString();
 
         return Inertia::render('admin/crm/orders/index', [
             'orders' => $orders,
@@ -67,6 +73,8 @@ class CrmOrderController extends Controller
                 'commercial_status' => $commercialStatus,
                 'priority' => $priority,
                 'search' => $search,
+                'sort_by' => $columnToSort,
+                'sort_direction' => $direction,
             ],
             'operating_statuses' => [
                 'no_iniciado' => 'No iniciado',

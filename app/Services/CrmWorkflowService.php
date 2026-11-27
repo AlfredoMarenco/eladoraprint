@@ -190,6 +190,62 @@ class CrmWorkflowService
     }
 
     /**
+     * Convert an Opportunity directly to a CrmOrder.
+     */
+    public function convertOpportunityToOrder(Opportunity $opportunity, ?int $userId = null): CrmOrder
+    {
+        return DB::transaction(function () use ($opportunity, $userId) {
+            $folio = $this->generateFolio('order', $opportunity->universe);
+
+            $overheadMethod = BusinessSetting::get('workshop_overhead_method', 'percent');
+            $overheadVal = (float) BusinessSetting::get('workshop_overhead_value', 10);
+            $amount = (float) ($opportunity->estimated_amount ?? 0);
+            $overheadAmount = match ($overheadMethod) {
+                'percent' => round(($amount * $overheadVal) / 100, 2),
+                'fixed' => $overheadVal,
+                default => 0.0,
+            };
+
+            $order = CrmOrder::create([
+                'folio' => $folio,
+                'client_id' => $opportunity->client_id,
+                'quotation_id' => null,
+                'universe' => $opportunity->universe,
+                'project_name' => $opportunity->title,
+                'service_type' => $opportunity->universe === 'print' ? 'Impresión y Papelería' : ($opportunity->universe === 'studio' ? 'Diseño y Branding' : 'Experiencias y Eventos'),
+                'description' => $opportunity->description,
+                'requested_at' => now(),
+                'start_planned_at' => now(),
+                'delivery_agreed_at' => $opportunity->estimated_close_date ? Carbon::parse($opportunity->estimated_close_date) : now()->addDays(14),
+                'commercial_status' => 'confirmado',
+                'operating_status' => 'no_iniciado',
+                'priority' => $opportunity->priority ?? 'medium',
+                'approved_amount' => $amount,
+                'advance_required' => round($amount * 0.5, 2),
+                'workshop_overhead_type' => $overheadMethod,
+                'workshop_overhead_amount' => $overheadAmount,
+                'notes' => 'Convertido directamente desde la oportunidad '.$opportunity->folio,
+            ]);
+
+            $opportunity->update(['stage' => 'confirmado']);
+
+            $this->initializeOrderTasks($order);
+
+            CrmActivityLog::log($order, 'converted', "Pedido {$order->folio} creado directamente desde oportunidad {$opportunity->folio}", [
+                'opportunity_folio' => $opportunity->folio,
+                'approved_amount' => $order->approved_amount,
+            ], $userId);
+
+            CrmActivityLog::log($opportunity, 'converted_to_order', "Oportunidad convertida a pedido {$order->folio}", [
+                'order_folio' => $order->folio,
+                'order_id' => $order->id,
+            ], $userId);
+
+            return $order;
+        });
+    }
+
+    /**
      * Default tasks specification per universe as defined in specifications.
      */
     public function getDefaultUniverseTasks(string $universe): array
